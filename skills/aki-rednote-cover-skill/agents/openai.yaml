@@ -1,0 +1,4 @@
+interface:
+  display_name: "Aki Rednote Cover"
+  short_description: "Create minimalist 3:4 Xiaohongshu note covers"
+  default_prompt: "Use $aki-rednote-cover-skill to create a cover for this specific Xiaohongshu knowledge or tool note."
