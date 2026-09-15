@@ -1,4 +1,0 @@
-interface:
-  display_name: "Aki Rednote Cover"
-  short_description: "生成 3:4、2.35:1、1:1 三比例小红书封面"
-  default_prompt: "使用 $aki-rednote-cover-skill 为这篇知识或工具类笔记生成三张独立封面，并保持城下秋草固定视觉系统。"

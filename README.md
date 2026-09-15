@@ -1,98 +1,58 @@
 # aki-agent-kit
 
-面向个人 AI 开发工作流的中央规则仓库：统一维护 **Skills、AGENTS.md、开发原则、审计规则与项目 bootstrap**。
+个人 AI Agent 工作流的**增量层**：不重新发明 `AGENTS.md` 或 Agent Skills 标准，只维护我自己的开发原则和真正有差异化价值的 Skills。
 
 ![aki-agent-kit 仓库封面](assets/aki-agent-kit-social-preview.jpg)
 
-## 核心思路
+## 定位
 
-中央仓库维护长期通用规则，业务项目只保留自己的真实事实和一个很小的本地 bootstrap。
+本仓库遵循“通用能力上游化，个人差异自己维护”的原则。
 
-```text
-业务项目 AGENTS.md
-        ↓
-agent-rules.yaml
-        ↓
-project / game AGENTS.md
-        +
-Git principles
-        +
-按需 audit principles
-```
+上游负责格式、发现和生态：
 
-这样中央原则和 Skill 可以持续演进，而不需要把同一份规则复制到每个项目中。
+- `AGENTS.md` 约定：<https://github.com/agentsmd/agents.md>
+- Agent Skills 规范：<https://github.com/agentskills/agentskills>
+- Skill 参考实现：<https://github.com/anthropics/skills>
+- OpenAI Plugin / Skill 生态：<https://github.com/openai/plugins>
+- 通用软件开发工作流参考：<https://github.com/obra/superpowers>
 
-项目开发过程中产生、但尚未写入项目文档的重要会话上下文，由 `aki-context-sync-skill` 负责审计和沉淀；它不会把聊天记录直接变成项目记忆。
+`aki-agent-kit` 不复制这些项目已经解决的 schema、安装机制和通用开发框架，只保存个人偏好、专用工作流和需要跨项目复用的判断原则。
 
-## Agent Profiles
+## 本仓库真正维护什么
 
-### `agents/project/AGENTS.md`
+### Principles
 
-普通软件、App、前端、后端、CLI 和工具项目的通用开发原则，覆盖事实确认、最小完整改动、状态所有权、生命周期、依赖、测试和文档。
+- `principles/project-development.md`：普通软件项目的个人开发基线。
+- `principles/game-development.md`：独立游戏项目补充原则。
+- `principles/git.md`：Git 分支、commit、合并和破坏性操作原则。
+- `principles/simplification.md`：基于真实消费者证据的项目精简审计。
+- `principles/game-simplification.md`：游戏项目额外从玩家路径、引擎引用和内容成本做精简审计。
+- `principles/skill-authoring.md`：在 Agent Skills 标准之上的个人 Skill 内容质量规范。
 
-### `agents/game/AGENTS.md`
+### Skills
 
-独立游戏项目补充原则，在通用基线上增加玩家路径、垂直切片、游戏状态、场景资源、内容成本、存档、性能和试玩要求。
+- `aki-project-bootstrap`：为项目幂等接入本仓库的个人开发原则，只维护 `AGENTS.md` 中自己的 managed region。
+- `aki-context-sync`：把开发会话中真正值得长期保存的隐性上下文审计后同步进项目权威文档。
+- `aki-github-readme`：生成、重写和审查 GitHub README。
+- `aki-rednote-cover`：生成“城下秋草”统一视觉的小红书封面。
 
-## Principles
+## 使用方式
 
-### `principles/git-version-control.md`
+### Skills
 
-统一 Git 分支、commit、合并、清理和破坏性操作原则。
+通过所用 Agent 平台支持的标准 Skill 安装/发现方式使用 `skills/` 下的目录。本仓库不再维护自定义 Skill registry 或平台专属分发协议。
 
-### `principles/project-simplification-audit.md`
+各平台安装位置和发现机制可能不同，以平台当前文档和 Agent Skills 规范为准。
 
-普通软件项目精简审计，寻找有真实证据、能够减少 API、状态、生命周期、依赖和行为表面积的候选。
+### 项目开发原则
 
-### `principles/indie-game-simplification-audit.md`
+如果希望某个项目持续使用这里的个人开发原则，可以运行 `aki-project-bootstrap`。它会在项目根 `AGENTS.md` 中维护一个很小的 managed region，并直接引用 `main` 上的 canonical principle 文件。
 
-独立游戏项目精简审计，同时从玩家路径、代码复杂度和长期内容生产成本判断功能是否值得保留。
+这里的远程引用只是个人增量机制，不属于 `AGENTS.md` 标准本身；运行环境无法读取远程文件时必须明确报告。
 
-### `principles/skill-authoring.md`
+### 会话上下文沉淀
 
-约束本仓库所有 Skill 的编写方式：指导优先、职责单一、修改幂等、避免案例堆积和会话级残留。
-
-## Skills
-
-### `aki-project-bootstrap-skill`
-
-为新项目或已有项目幂等建立 `AGENTS.md` bootstrap。它只维护自己的 managed region，保留项目原有内容，并接入中央最新规则。
-
-### `aki-context-sync-skill`
-
-审计当前开发会话与项目事实，把尚未持久化、未来仍有价值且不易从代码直接重建的上下文，去重、清理后合并进已有权威文档。相同输入重复执行应产生零 diff。
-
-### `aki-github-readme-skill`
-
-生成、重写和审查 GitHub README，重点处理项目定位、最小使用路径、视觉素材、可访问性和长期维护。
-
-### `aki-rednote-cover-skill`
-
-生成和迭代“城下秋草”知识/工具类封面，保持固定视觉识别，并分别生成 3:4、2.35:1 和 1:1 三个独立比例。
-
-## 中央规则入口
-
-分发项目只需要固定一个入口：
-
-```text
-https://github.com/gongfpp/aki-agent-kit/blob/main/agent-rules.yaml?raw=1
-```
-
-`agent-rules.yaml` 记录当前规则 URL、加载条件和 profile 继承关系。专项审计规则按需加载，不无条件占用普通开发上下文。
-
-## 项目接入与后续沉淀
-
-新项目或已有项目首次接入时使用 `aki-project-bootstrap-skill`。它负责建立稳定的远程规则入口，不拥有项目其他文档。
-
-后续经过多轮开发后，需要把会话中的隐性决策和非显然约束持久化时使用 `aki-context-sync-skill`。它优先更新已有权威文档，只有确实没有合适位置时才创建 `docs/project-context.md`。
-
-两者都遵循幂等原则：在输入和项目状态不变时再次执行，不应继续追加、改写或重新排序稳定内容。
-
-## 演进记录
-
-当前文件始终表达当前有效状态。低层修改历史由 Git 保存；影响使用方式、职责边界、兼容性和工作流的语义变化记录在 `CHANGELOG.md`。
-
-仓库自身的 Skill 编写与修改遵循 `principles/skill-authoring.md`，避免随着迭代不断积累只对旧会话有意义的说明。
+经过多轮开发后，使用 `aki-context-sync` 审计当前会话、代码变更和已有文档。它只保存长期有效、不易重建且会影响未来判断的信息，不保存聊天历史、纠错过程或可直接从代码得到的事实。
 
 ## 目录
 
@@ -101,37 +61,31 @@ https://github.com/gongfpp/aki-agent-kit/blob/main/agent-rules.yaml?raw=1
 ├── AGENTS.md
 ├── CHANGELOG.md
 ├── README.md
-├── agent-rules.yaml
-├── agents/
-│   ├── project/AGENTS.md
-│   └── game/AGENTS.md
+├── assets/
+│   └── aki-agent-kit-social-preview.jpg
 ├── principles/
-│   ├── git-version-control.md
-│   ├── project-simplification-audit.md
-│   ├── indie-game-simplification-audit.md
+│   ├── project-development.md
+│   ├── game-development.md
+│   ├── git.md
+│   ├── simplification.md
+│   ├── game-simplification.md
 │   └── skill-authoring.md
-├── skills/
-│   ├── aki-project-bootstrap-skill/
-│   │   ├── SKILL.md
-│   │   ├── templates/AGENTS.bootstrap.md
-│   │   └── agents/openai.yaml
-│   ├── aki-context-sync-skill/
-│   │   ├── SKILL.md
-│   │   └── agents/openai.yaml
-│   ├── aki-github-readme-skill/
-│   │   ├── SKILL.md
-│   │   └── agents/openai.yaml
-│   └── aki-rednote-cover-skill/
-│       ├── SKILL.md
-│       └── agents/openai.yaml
-└── assets/
-    └── aki-agent-kit-social-preview.jpg
+└── skills/
+    ├── aki-project-bootstrap/
+    │   ├── SKILL.md
+    │   └── assets/AGENTS.md
+    ├── aki-context-sync/
+    │   └── SKILL.md
+    ├── aki-github-readme/
+    │   └── SKILL.md
+    └── aki-rednote-cover/
+        └── SKILL.md
 ```
 
-## 使用原则
+## 维护原则
 
-- 中央通用规则维护在 `main`；项目事实仍以各项目自己的代码、配置、契约和本地文档为准。
-- `AGENTS.md` 保存长期 Agent 工作约束，`principles/` 保存单主题规则，Skill 负责需要主动执行的工作流。
-- 修改型 Skill 必须先读取、再合并，不能强制覆盖已有内容。
-- 当前文档不保存已经失效的历史状态；需要追溯时使用 Git 与 `CHANGELOG.md`。
-- 远程规则读取失败时必须显式说明，不把缓存或猜测内容冒充最新版。
+- 上游标准已经解决的问题不在本仓库再造第二套规范。
+- 当前文件只表达当前有效状态；旧结构和旧规则由 Git 历史追溯。
+- 修改型 Skill 必须幂等，相同输入和项目状态下第二次执行应产生零 diff。
+- 影响使用方式、职责边界、兼容性或工作流的语义变化记录在 `CHANGELOG.md`。
+- 新内容只有在能改变 Agent 的判断或执行时才进入仓库，避免把项目变成个人提示词垃圾场。

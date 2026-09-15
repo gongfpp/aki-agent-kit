@@ -1,0 +1,63 @@
+# 项目精简审计
+
+目标：寻找有真实证据、能够真正删除或合并维护复杂度的候选。宁可只保留少量高置信结论，也不要因为“看起来复杂”就重构。
+
+## 优先寻找
+
+- 没有生产消费者的 API、方法、事件、配置、Helper 或 Package；
+- 只有测试、文档或示例使用，但并非真实契约的行为；
+- 多套状态或 representation 维护同一个事实；
+- 所有实现被迫支持、但真实消费者并不需要的接口能力；
+- 只为测试、Demo、Support 或旧原型存在的独立层；
+- 没有当前产品需求的推测性通用设计；
+- 只为保护无用 API 而存在的 invariant、rollback、特殊测试和防御逻辑；
+- 标准库或成熟依赖已覆盖的自维护基础设施；
+- 多套机制表达同一个 lifecycle、liveness 或 settlement 状态。
+
+## 用真实调用证明
+
+先广泛扫描，再读取真实 call site。优先使用 `rg` 搜索 symbol、event、package、config key、method 和 wire string。
+
+把消费者区分为：
+
+- **Production**：真实源码、loader、config 和 runtime 路径；
+- **Non-production**：tests、docs、README、snapshot、comments；
+- **Ambiguous**：example、script、support 等可能进入真实运行路径的内容，需要继续确认。
+
+存在生产消费者时，不把“代码复杂”本身当作删除理由。
+
+## 状态与生命周期审计
+
+复杂异步或资源管理代码必须明确：
+
+- 谁拥有状态和资源；
+- 谁能够修改，谁只观察；
+- 谁创建和释放；
+- 每个 flag、sentinel、promise、token、cancellation 和 disposer 分别表达什么事实。
+
+如果多个机制实际表达同一个事实，优先收敛为一个清晰的状态模型、transaction 或 lifecycle controller。
+
+## 判断是否值得删
+
+通常降低优先级或放弃的情况：
+
+- 存在真实生产调用者；
+- 已有设计记录解释该结构解决的真实问题；
+- 删除会产生大量无关改动，却没有减少 API、状态、生命周期或行为面；
+- 收益存在但非常小，局部 TODO 已足够。
+
+引入依赖只有在产生净删除时才算精简：被删除的实现、专属测试、文档和维护风险，应明显大于新增 glue code、升级成本和兼容成本。
+
+## 输出候选
+
+每个重要候选说明：
+
+- **Problem**：复杂度和消费者证据；
+- **Proposal**：准备删除、合并、降级、迁移或内联什么；
+- **What we give up**：失去的能力；
+- **Acceptance criteria**：完成后必须成立的行为；
+- **Risks**：API、数据、行为和迁移风险。
+
+执行精简时同步收敛相关测试、注释、README、JSDoc、配置和生成物。
+
+最终目标不是让代码更漂亮或文件更少，而是实际减少需要长期理解和维护的 API、状态、生命周期、依赖与行为表面积。

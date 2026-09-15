@@ -1,4 +1,0 @@
-interface:
-  display_name: "Aki Context Sync"
-  short_description: "审计并沉淀开发会话中的长期项目上下文"
-  default_prompt: "使用 $aki-context-sync-skill 审计当前开发会话和项目文档，把仍有长期价值但尚未持久化的上下文幂等合并进现有权威文档。"

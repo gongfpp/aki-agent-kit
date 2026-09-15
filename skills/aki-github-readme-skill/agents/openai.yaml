@@ -1,4 +1,0 @@
-interface:
-  display_name: "Aki GitHub README"
-  short_description: "生成清晰可维护的 GitHub README"
-  default_prompt: "使用 $aki-github-readme-skill 生成或改写这个 GitHub 仓库的 README。"
