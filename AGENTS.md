@@ -12,7 +12,26 @@
 
 - `principles/`：个人长期开发原则和专项判断规则。
 - `skills/`：符合 Agent Skills 结构、需要主动执行的个人工作流。
+- `scripts/`：仓库级确定性工具，目前包含用户级 Skill 安装器。
 - `assets/`：仓库级静态资源。
+
+## Skill Installation
+
+当用户要求安装本仓库中的 Skills，且没有明确指定其他安装方式或目标目录时，使用仓库提供的 `scripts/install.sh` 作为 canonical 安装入口。
+
+如果当前已经位于本仓库 checkout 中，执行：
+
+```bash
+bash scripts/install.sh
+```
+
+如果用户只提供了本仓库地址、当前没有本地 checkout，可执行：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh | bash
+```
+
+默认安装到用户级 `~/.agents/skills`。用户或目标平台明确要求其他 Skill 目录时，通过 `AKI_SKILLS_DIR` 指定。安装、更新和受管 Skill 收敛都复用同一脚本；只有脚本无法使用时才采用等价替代方案，并说明原因。
 
 ## Skill Authoring
 
@@ -61,6 +80,7 @@
 - YAML frontmatter、Markdown、相对路径和远程 URL 有效；
 - README 目录结构与真实仓库一致；
 - 所有引用指向当前存在的 canonical 文件；
+- 安装说明与 `scripts/install.sh` 的真实行为一致；
 - 平台专属 metadata 具有真实用途；
 - 修改型 Skill 的所有权和幂等边界明确；
 - 当前目录只保留仍有行为价值的内容。
