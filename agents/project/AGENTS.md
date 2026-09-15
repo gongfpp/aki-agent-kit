@@ -60,7 +60,7 @@
 
 仓库修改任务必须遵循中央 Git 原则：
 
-https://github.com/gongfpp/aki-skills/blob/main/principles/git-version-control.md?raw=1
+https://github.com/gongfpp/aki-agent-kit/blob/main/principles/git-version-control.md?raw=1
 
 在开始需要产生 Git 改动的任务时读取最新版本；不要把当前文件中的摘要当作中央规则的替代品。
 
@@ -68,6 +68,6 @@ https://github.com/gongfpp/aki-skills/blob/main/principles/git-version-control.m
 
 只有在用户要求代码审计、精简、清理、架构收敛、删除无用复杂度等任务时，再加载：
 
-https://github.com/gongfpp/aki-skills/blob/main/principles/project-simplification-audit.md?raw=1
+https://github.com/gongfpp/aki-agent-kit/blob/main/principles/project-simplification-audit.md?raw=1
 
 普通功能开发不要预先加载审计规则，避免无关上下文影响实现。

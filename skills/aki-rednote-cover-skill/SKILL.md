@@ -1,46 +1,74 @@
 ---
 name: aki-rednote-cover-skill
-description: Create or iterate minimalist 3:4 Xiaohongshu knowledge and tool-note covers using the fixed personal IP system “城下秋草”. Apply when designing a specific note cover, cover prompt, or cover variation; do not use for general posters, banners, or unrelated branding.
+description: 生成和迭代“城下秋草”知识/工具类小红书封面，使用固定视觉识别系统，并为不同发布比例独立重构版式。
 ---
 
 # aki-rednote-cover-skill
 
-## Session convention
+## 目标
 
-This conversation is the dedicated cover-generation session for the user. Treat the rules below as the current visual system and continue refining them here when the user explicitly proposes an iteration. A new cover request should inherit the established system unless the user clearly asks to change it. Do not silently create a second visual direction.
+为知识、工具、工作流和经验分享类内容生成统一、可识别、缩略图优先的小红书封面。视觉系统保持稳定，具体标题和内容表达随笔记主题变化。
 
-## Fixed visual system
+## 固定视觉系统
 
-- Canvas: 3:4 vertical format. Design for the thumbnail first, then check the full-size composition.
-- Base: pure grass green as the dominant background; black is the primary text color.
-- IP mark: always retain the personal IP text “城下秋草” as a small, consistent identifier.
-- Composition: keep the font family, type scale, alignment, margins, and placement stable across covers. If any of these have not yet been explicitly fixed, choose one restrained specification for the current series and reuse it in later covers unless the user approves a change.
-- Anchor: reserve a minimal small grass motif in the lower-right corner as a recurring visual anchor. It should support recognition, not become an illustration.
+- 以草绿色纯色背景和黑色主文字建立核心识别。
+- 保留“城下秋草”作为稳定、克制的个人 IP 标识。
+- 字体层级、对齐、留白、边距和视觉锚点在同一系列中保持一致。
+- 保留简洁的小草视觉锚点，但不让装饰抢占标题信息层级。
+- 视觉表现以信息可读性和系列识别优先，不通过复杂装饰提升“丰富度”。
 
-## Content rules
+## 输出契约
 
-1. One cover communicates one core topic. Extract the shortest accurate title from the note and remove secondary claims, subtitles, and decorative copy.
-2. Keep the information hierarchy to: IP mark → large title → optional extremely short scope hint. The title must remain readable at thumbnail size.
-3. For concrete tools or workflows, a very light contextual cue is allowed—such as terminal symbols, a MacBook outline, or one device element—but it must never compete with the title or turn the cover into a product collage.
-4. Avoid banner-like layouts, dense decoration, gradients or ornamental clutter, multiple logos, fake UI screenshots, and marketing slogans such as “必看”, “保姆级”, or exaggerated promises.
-5. Do not add tools, features, results, or claims that are absent from the note merely to make the cover look richer.
+每次封面任务输出且只输出 3 张彼此独立的图片：
 
-## Generation workflow
+1. 3:4 主图；
+2. 2.35:1 横版；
+3. 1:1 方图。
 
-When the user provides a specific note:
+三个比例必须分别构图和生成。3:4 是完整信息母版；横版和方图根据同一视觉系统重新组织信息，不通过简单裁切获得。
 
-- Identify the single subject and reduce it to a compact title suitable for a thumbnail.
-- Preserve the fixed visual system and decide whether a single restrained scene cue is genuinely useful.
-- Generate the cover or a production-ready image prompt with explicit 3:4 layout, text hierarchy, colors, placement, and negative constraints.
-- Inspect the result at thumbnail scale: title legibility, hierarchy, empty space, IP recognition, grass-anchor visibility, and absence of competing marks.
-- If text rendering is unreliable, prefer a clean composition with reserved text areas and report that text may need to be typeset afterward; never compensate with extra decoration.
+禁止把多个比例排进同一张图，禁止拼贴、总览图、联系表或一张图中的多候选版。每个比例只生成一个最终版本，顺序保持稳定。
 
-If the core topic is missing, ask only for the note topic or a one-line title. Do not ask the user to restate the fixed style system.
+## 内容原则
 
-## Iteration protocol
+- 一张封面只表达一个核心主题，标题尽量短、准确，并在缩略图尺寸保持清晰。
+- 标题、辅助文字和视觉元素只能来自原内容中真实存在的信息，不为了增强吸引力添加未经支持的功能、结论或承诺。
+- 辅助信息只有在能够帮助读者快速理解主题范围时才保留；不能增加判断价值的副标题和装饰文字删除。
+- 标题过于专业、缩略图难以理解时，先指出问题并给出更易读的表达方向，再进行生成。
+- 不使用夸张营销措辞、密集 Logo、伪造界面或与主题无关的装饰素材。
 
-When revising a cover, change only the requested variable where possible. Keep the background, IP mark, typography system, layout, and lower-right grass anchor unchanged unless the user explicitly requests a system-level revision. Record any accepted change as part of the new working baseline for this dedicated session.
+## 构图原则
 
-## Output expectations
+三个比例共享同一识别系统，但信息密度和排版必须适应各自画布：
 
-For an image request, return the generated cover and briefly state the chosen core title. For a prompt-only request, provide one concise prompt that can be used to generate the cover, followed by a short negative prompt if useful. Do not provide several competing styles unless the user asks for alternatives.
+- 3:4 承载完整标题层级和必要的主题提示；
+- 2.35:1 保留最重要信息，重建横向阅读节奏；
+- 1:1 压缩为方形缩略图仍能快速识别的结构。
+
+不要让横版或方图因为继承竖版坐标而出现被截断、过度留白或信息重心偏移。
+
+## 工作流
+
+1. 从笔记中确认唯一核心主题和最短准确标题。
+2. 判断是否需要极少量上下文视觉元素；没有信息价值时保持纯文字视觉。
+3. 先确定 3:4 主图的信息层级，再分别为横版和方图重新布局。
+4. 三张图片独立生成，每次只生成目标比例对应的一张图。
+5. 从读者视角检查缩略图可读性、标题准确度、信息层级、留白、IP 标识和三个比例之间的视觉一致性。
+6. 发现生成文字错误、重复元素、比例混排或主题偏移时修正对应图片，不通过增加更多候选图规避问题。
+
+## 迭代规则
+
+修改封面时优先只改变用户指定的变量。没有明确要求改变视觉系统时，背景、文字系统、IP 标识、基础版式逻辑和视觉锚点保持稳定。
+
+只有用户明确确认系统级变化时，才把该变化作为后续任务的新基线。不要把某次单图修正自动升级成全局规则。
+
+## 验收
+
+完成前确认：
+
+- 恰好 3 张独立图片，比例和顺序正确；
+- 三张均为独立构图而不是裁切或拼贴；
+- 标题能够在缩略图中快速读取；
+- 没有原内容之外的功能、结论或营销承诺；
+- 三个比例共享同一视觉身份，但各自适应画布；
+- 用户未要求改变的系统级元素保持稳定。

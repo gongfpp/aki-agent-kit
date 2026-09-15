@@ -1,0 +1,4 @@
+interface:
+  display_name: "Aki Project Bootstrap"
+  short_description: "幂等接入项目 AGENTS.md 与中央开发规则"
+  default_prompt: "使用 $aki-project-bootstrap-skill 为当前项目建立或升级 AGENTS.md bootstrap，保留已有项目内容并确保重复执行零 diff。"

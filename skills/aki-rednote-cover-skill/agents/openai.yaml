@@ -1,4 +1,4 @@
 interface:
   display_name: "Aki Rednote Cover"
-  short_description: "Create minimalist 3:4 Xiaohongshu note covers"
-  default_prompt: "Use $aki-rednote-cover-skill to create a cover for this specific Xiaohongshu knowledge or tool note."
+  short_description: "生成 3:4、2.35:1、1:1 三比例小红书封面"
+  default_prompt: "使用 $aki-rednote-cover-skill 为这篇知识或工具类笔记生成三张独立封面，并保持城下秋草固定视觉系统。"
