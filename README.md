@@ -30,9 +30,26 @@
 - `aki-github-readme`：生成、重写和审查 GitHub README。
 - `aki-rednote-cover`：生成“城下秋草”统一视觉的小红书封面。
 
+## 用户级安装
+
+将全部 Skill 安装到通用用户级目录 `~/.agents/skills`：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh | bash
+```
+
+安装器会复制真实目录而不是创建符号链接；重复执行同一条命令即可从 `main` 更新，并清理已经从本仓库删除的受管 Skill。已有同名但并非本安装器管理的目录不会被覆盖。
+
+如果某个平台使用其他用户级 Skill 目录，通过 `AKI_SKILLS_DIR` 指定。例如 Codex 可安装到 `$CODEX_HOME/skills`（默认 `~/.codex/skills`）：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
+  | AKI_SKILLS_DIR="${CODEX_HOME:-$HOME/.codex}/skills" bash
+```
+
 ## 使用方式
 
-`skills/` 按所用 Agent 平台支持的 Agent Skills 发现或安装机制使用；具体安装位置以平台当前文档为准。
+安装完成后，在任意项目里可以直接调用 Skill 名称，无需再次提供 GitHub 地址。
 
 项目首次接入个人开发原则时使用 `aki-project-bootstrap`。多轮开发后需要沉淀隐性决策和非显然约束时使用 `aki-context-sync`。
 
@@ -53,6 +70,8 @@
 │   ├── simplification.md
 │   ├── game-simplification.md
 │   └── skill-authoring.md
+├── scripts/
+│   └── install.sh
 └── skills/
     ├── aki-project-bootstrap/
     │   ├── SKILL.md
