@@ -89,20 +89,28 @@ if ! git clone --quiet --depth 1 --branch "$REF" "$REPO_URL" "$tmp_dir/repo"; th
   exit 1
 fi
 
-AVAILABLE_SKILLS=()
+# Skill names follow the Agent Skills naming convention and therefore contain no spaces.
+# Keep these collections as plain strings instead of Bash arrays so the installer remains
+# compatible with the system Bash 3.2 that still ships with macOS under `set -u`.
+AVAILABLE_SKILLS=""
 for src in "$tmp_dir"/repo/skills/*; do
   [ -d "$src" ] || continue
   [ -f "$src/SKILL.md" ] || continue
-  AVAILABLE_SKILLS+=("$(basename "$src")")
+  skill_name="$(basename "$src")"
+  if [ -n "$AVAILABLE_SKILLS" ]; then
+    AVAILABLE_SKILLS="$AVAILABLE_SKILLS $skill_name"
+  else
+    AVAILABLE_SKILLS="$skill_name"
+  fi
 done
 
-contains() {
-  needle="$1"
-  shift
-  for item in "$@"; do
-    [ "$item" = "$needle" ] && return 0
-  done
-  return 1
+contains_skill() {
+  local needle="$1"
+  local list="$2"
+  case " $list " in
+    *" $needle "*) return 0 ;;
+    *) return 1 ;;
+  esac
 }
 
 skill_summary() {
@@ -135,7 +143,7 @@ TXT
 
 print_available() {
   echo "可用 Skill / Available Skills:"
-  for name in "${AVAILABLE_SKILLS[@]}"; do
+  for name in $AVAILABLE_SKILLS; do
     echo "  - $name — $(skill_summary "$name")"
   done
 }
@@ -147,15 +155,19 @@ if [ "$LIST_ONLY" -eq 1 ]; then
   exit 0
 fi
 
-SELECTED_SKILLS=()
+SELECTED_SKILLS=""
 add_selected() {
-  name="$1"
-  if ! contains "$name" "${AVAILABLE_SKILLS[@]}"; then
+  local name="$1"
+  if ! contains_skill "$name" "$AVAILABLE_SKILLS"; then
     echo "错误 / Error: 仓库中不存在 Skill / Skill not found in repository: $name" >&2
     exit 1
   fi
-  if ! contains "$name" "${SELECTED_SKILLS[@]}"; then
-    SELECTED_SKILLS+=("$name")
+  if ! contains_skill "$name" "$SELECTED_SKILLS"; then
+    if [ -n "$SELECTED_SKILLS" ]; then
+      SELECTED_SKILLS="$SELECTED_SKILLS $name"
+    else
+      SELECTED_SKILLS="$name"
+    fi
   fi
 }
 
@@ -190,7 +202,9 @@ else
       add_selected "aki-open-source-audit"
       ;;
     all)
-      for name in "${AVAILABLE_SKILLS[@]}"; do add_selected "$name"; done
+      for name in $AVAILABLE_SKILLS; do
+        add_selected "$name"
+      done
       ;;
     *)
       echo "错误 / Error: 未知集合 / Unknown preset: $REQUESTED_SET" >&2
@@ -199,16 +213,16 @@ else
   esac
 fi
 
-[ "${#SELECTED_SKILLS[@]}" -gt 0 ] || { echo "错误 / Error: 最终 Skill 集合为空 / Final Skill set is empty." >&2; exit 1; }
+[ -n "$SELECTED_SKILLS" ] || { echo "错误 / Error: 最终 Skill 集合为空 / Final Skill set is empty." >&2; exit 1; }
 
-echo "选择的 Skill / Selected Skills: ${SELECTED_SKILLS[*]}"
+echo "选择的 Skill / Selected Skills: $SELECTED_SKILLS"
 echo
 
 installed=0
 updated=0
 removed=0
 
-for name in "${SELECTED_SKILLS[@]}"; do
+for name in $SELECTED_SKILLS; do
   src="$tmp_dir/repo/skills/$name"
   dest="$DEST_DIR/$name"
   marker="$dest/.aki-agent-kit-managed"
@@ -243,7 +257,7 @@ for dest in "$DEST_DIR"/aki-*; do
   [ -d "$dest" ] || continue
   [ -f "$dest/.aki-agent-kit-managed" ] || continue
   name="$(basename "$dest")"
-  if ! contains "$name" "${SELECTED_SKILLS[@]}"; then
+  if ! contains_skill "$name" "$SELECTED_SKILLS"; then
     echo "清理 / Removing: $name"
     rm -rf "$dest"
     removed=$((removed + 1))
@@ -259,7 +273,7 @@ echo "安装目录 / Directory: $DEST_DIR"
 echo
 echo "Skill 使用方法 / Skill usage"
 
-for name in "${SELECTED_SKILLS[@]}"; do
+for name in $SELECTED_SKILLS; do
   echo
   echo "$name"
   case "$name" in
