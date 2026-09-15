@@ -11,8 +11,9 @@ Project profile: `{{PROJECT_PROFILE}}`
    https://github.com/gongfpp/aki-agent-kit/blob/main/principles/project-development.md?raw=1
 2. 如果 profile 为 `game`，额外读取：
    https://github.com/gongfpp/aki-agent-kit/blob/main/principles/game-development.md?raw=1
-3. 需要产生 Git 修改时读取：
+3. 在 Git 仓库内执行任何会写入项目文件的任务时，在修改前读取 Git 原则：
    https://github.com/gongfpp/aki-agent-kit/blob/main/principles/git.md?raw=1
+   任务完成并验证后按该原则完成 Git 收尾。除非用户明确要求保留未提交状态，不把“是否提交”作为例行确认问题。
 4. 只有在精简、清理、架构收敛或删除无用复杂度的任务中读取：
    https://github.com/gongfpp/aki-agent-kit/blob/main/principles/simplification.md?raw=1
    如果 profile 为 `game`，同时读取：
