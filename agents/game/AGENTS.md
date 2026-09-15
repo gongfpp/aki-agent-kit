@@ -4,7 +4,7 @@
 
 开始游戏项目工作时同时读取：
 
-https://github.com/gongfpp/aki-skills/blob/main/agents/project/AGENTS.md?raw=1
+https://github.com/gongfpp/aki-agent-kit/blob/main/agents/project/AGENTS.md?raw=1
 
 ## 玩家路径优先于代码形态
 
@@ -76,10 +76,10 @@ https://github.com/gongfpp/aki-skills/blob/main/agents/project/AGENTS.md?raw=1
 
 遵循中央 Git 原则：
 
-https://github.com/gongfpp/aki-skills/blob/main/principles/git-version-control.md?raw=1
+https://github.com/gongfpp/aki-agent-kit/blob/main/principles/git-version-control.md?raw=1
 
 ## 游戏项目精简审计（按需加载）
 
 只有在用户要求游戏审计、精简、删除无用玩法、架构收敛、内容成本审查等任务时加载：
 
-https://github.com/gongfpp/aki-skills/blob/main/principles/indie-game-simplification-audit.md?raw=1
+https://github.com/gongfpp/aki-agent-kit/blob/main/principles/indie-game-simplification-audit.md?raw=1

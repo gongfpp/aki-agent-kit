@@ -1,4 +1,0 @@
-interface:
-  display_name: "Aki Project Init"
-  short_description: "初始化项目 AGENTS.md 与中央开发规则"
-  default_prompt: "使用 $aki-project-init-skill 初始化或升级当前项目的 AGENTS.md，并按项目类型接入中央最新规则。"
