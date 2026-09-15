@@ -1,0 +1,26 @@
+schema_version: 1
+channel: main
+repository: gongfpp/aki-skills
+
+rules:
+  project:
+    kind: agent
+    load: always
+    url: https://github.com/gongfpp/aki-skills/raw/refs/heads/main/agents/project/AGENTS.md
+  game:
+    kind: agent
+    load: game-profile
+    extends: project
+    url: https://github.com/gongfpp/aki-skills/raw/refs/heads/main/agents/game/AGENTS.md
+  git:
+    kind: principle
+    load: repository-write-task
+    url: https://github.com/gongfpp/aki-skills/raw/refs/heads/main/principles/git-version-control.md
+  project-simplification-audit:
+    kind: principle
+    load: on-demand
+    url: https://github.com/gongfpp/aki-skills/raw/refs/heads/main/principles/project-simplification-audit.md
+  indie-game-simplification-audit:
+    kind: principle
+    load: on-demand-game
+    url: https://github.com/gongfpp/aki-skills/raw/refs/heads/main/principles/indie-game-simplification-audit.md
