@@ -16,6 +16,8 @@ aki-agent-kit Skill 安装器 / Skill Installer
   install.sh                         安装 project 集合（默认） / Install the project preset (default)
   install.sh --set core              安装 core 集合 / Install the core preset
   install.sh --set project           安装 project 集合 / Install the project preset
+  install.sh --set game              安装 game 集合 / Install the game preset
+  install.sh --set opensource        安装 opensource 集合 / Install the open-source preset
   install.sh --set all               安装全部 Skill / Install all Skills
   install.sh --skills a,b,c          指定最终受管 Skill 集合 / Set the exact managed Skill set
   install.sh --list                  查看预设与可用 Skill / List presets and available Skills
@@ -108,6 +110,10 @@ skill_summary() {
     aki-project-bootstrap) echo "项目接入与 AGENTS.md 初始化 / Project bootstrap and AGENTS.md setup" ;;
     aki-context-sync) echo "会话上下文持久化与文档收敛 / Session context consolidation" ;;
     aki-project-readme) echo "项目 README 生成、审查与维护 / Project README generation and review" ;;
+    aki-project-audit) echo "项目全面审计 / Full project audit" ;;
+    aki-open-source-audit) echo "开源前安全与合规审计 / Pre-open-source audit" ;;
+    aki-game-playtest-audit) echo "游戏玩家路径与试玩审计 / Game playtest audit" ;;
+    aki-project-handoff) echo "项目与 Session 接管简报 / Project and session handoff" ;;
     aki-rednote-cover) echo "小红书封面生成（个人专用） / Rednote cover generation (personal)" ;;
     *) echo "Skill" ;;
   esac
@@ -116,9 +122,11 @@ skill_summary() {
 print_presets() {
   cat <<'TXT'
 预设集合 / Presets:
-  core     = aki-project-bootstrap + aki-context-sync
-  project  = core + aki-project-readme（默认 / default）
-  all      = 仓库内全部 Skill，包含个人专用项 / all repository Skills, including personal Skills
+  core        = aki-project-bootstrap + aki-context-sync
+  project     = core + aki-project-readme + aki-project-audit + aki-project-handoff（默认 / default）
+  game        = project + aki-game-playtest-audit
+  opensource  = project + aki-open-source-audit
+  all         = 仓库内全部 Skill，包含个人专用项 / all repository Skills, including personal Skills
 
 精确选择 / Exact selection:
   使用 --skills skill-a,skill-b / Use --skills skill-a,skill-b
@@ -151,6 +159,14 @@ add_selected() {
   fi
 }
 
+add_project_set() {
+  add_selected "aki-project-bootstrap"
+  add_selected "aki-context-sync"
+  add_selected "aki-project-readme"
+  add_selected "aki-project-audit"
+  add_selected "aki-project-handoff"
+}
+
 if [ -n "$REQUESTED_SKILLS" ]; then
   normalized="$(printf '%s' "$REQUESTED_SKILLS" | tr ',' ' ')"
   for name in $normalized; do
@@ -163,9 +179,15 @@ else
       add_selected "aki-context-sync"
       ;;
     project)
-      add_selected "aki-project-bootstrap"
-      add_selected "aki-context-sync"
-      add_selected "aki-project-readme"
+      add_project_set
+      ;;
+    game)
+      add_project_set
+      add_selected "aki-game-playtest-audit"
+      ;;
+    opensource)
+      add_project_set
+      add_selected "aki-open-source-audit"
       ;;
     all)
       for name in "${AVAILABLE_SKILLS[@]}"; do add_selected "$name"; done
@@ -252,6 +274,22 @@ for name in "${SELECTED_SKILLS[@]}"; do
     aki-project-readme)
       echo '  中文：使用 `aki-project-readme` 审查并完善当前项目 README。'
       echo '  English: Use `aki-project-readme` to review and improve the current project README.'
+      ;;
+    aki-project-audit)
+      echo '  中文：使用 `aki-project-audit` 全面审计当前项目。'
+      echo '  English: Use `aki-project-audit` to audit the current project.'
+      ;;
+    aki-open-source-audit)
+      echo '  中文：使用 `aki-open-source-audit` 做开源前审计。'
+      echo '  English: Use `aki-open-source-audit` before making the repository public.'
+      ;;
+    aki-game-playtest-audit)
+      echo '  中文：使用 `aki-game-playtest-audit` 从玩家路径审计当前游戏。'
+      echo '  English: Use `aki-game-playtest-audit` to audit the game from the player path.'
+      ;;
+    aki-project-handoff)
+      echo '  中文：使用 `aki-project-handoff` 接管或交接当前项目。'
+      echo '  English: Use `aki-project-handoff` to take over or hand off the current project.'
       ;;
     aki-rednote-cover)
       echo '  中文：使用 `aki-rednote-cover` 为当前内容生成封面。'
