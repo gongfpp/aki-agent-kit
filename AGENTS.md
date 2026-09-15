@@ -39,7 +39,7 @@
 
 仓库修改遵循：
 
-https://github.com/gongfpp/aki-skills/raw/refs/heads/main/principles/git-version-control.md
+https://github.com/gongfpp/aki-skills/blob/main/principles/git-version-control.md?raw=1
 
 较大修改使用独立分支；完成验证后合并到 `main`，再删除完成分支。
 

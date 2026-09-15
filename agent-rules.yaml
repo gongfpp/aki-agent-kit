@@ -6,21 +6,21 @@ rules:
   project:
     kind: agent
     load: always
-    url: https://github.com/gongfpp/aki-skills/raw/refs/heads/main/agents/project/AGENTS.md
+    url: https://github.com/gongfpp/aki-skills/blob/main/agents/project/AGENTS.md?raw=1
   game:
     kind: agent
     load: game-profile
     extends: project
-    url: https://github.com/gongfpp/aki-skills/raw/refs/heads/main/agents/game/AGENTS.md
+    url: https://github.com/gongfpp/aki-skills/blob/main/agents/game/AGENTS.md?raw=1
   git:
     kind: principle
     load: repository-write-task
-    url: https://github.com/gongfpp/aki-skills/raw/refs/heads/main/principles/git-version-control.md
+    url: https://github.com/gongfpp/aki-skills/blob/main/principles/git-version-control.md?raw=1
   project-simplification-audit:
     kind: principle
     load: on-demand
-    url: https://github.com/gongfpp/aki-skills/raw/refs/heads/main/principles/project-simplification-audit.md
+    url: https://github.com/gongfpp/aki-skills/blob/main/principles/project-simplification-audit.md?raw=1
   indie-game-simplification-audit:
     kind: principle
     load: on-demand-game
-    url: https://github.com/gongfpp/aki-skills/raw/refs/heads/main/principles/indie-game-simplification-audit.md
+    url: https://github.com/gongfpp/aki-skills/blob/main/principles/indie-game-simplification-audit.md?raw=1

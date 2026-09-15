@@ -68,7 +68,7 @@ agent-rules.yaml
 分发项目优先只依赖一个稳定入口：
 
 ```text
-https://github.com/gongfpp/aki-skills/raw/refs/heads/main/agent-rules.yaml
+https://github.com/gongfpp/aki-skills/blob/main/agent-rules.yaml?raw=1
 ```
 
 `agent-rules.yaml` 记录当前规则 URL、加载条件和 profile 继承关系。专项审计规则默认按需加载，不占用普通开发会话上下文。
