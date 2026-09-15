@@ -278,36 +278,36 @@ for name in $SELECTED_SKILLS; do
   echo "$name"
   case "$name" in
     aki-project-bootstrap)
-      echo '  中文：使用 `aki-project-bootstrap` 初始化当前项目。'
-      echo '  English: Use `aki-project-bootstrap` to initialize the current project.'
+      echo '  使用 `aki-project-bootstrap` 初始化当前项目。'
+      echo '  Use `aki-project-bootstrap` to initialize the current project.'
       ;;
     aki-context-sync)
-      echo '  中文：使用 `aki-context-sync` 收敛当前会话上下文。'
-      echo '  English: Use `aki-context-sync` to consolidate the current session context.'
+      echo '  使用 `aki-context-sync` 收敛当前会话上下文。'
+      echo '  Use `aki-context-sync` to consolidate the current session context.'
       ;;
     aki-project-readme)
-      echo '  中文：使用 `aki-project-readme` 审查并完善当前项目 README。'
-      echo '  English: Use `aki-project-readme` to review and improve the current project README.'
+      echo '  使用 `aki-project-readme` 审查并完善当前项目 README。'
+      echo '  Use `aki-project-readme` to review and improve the current project README.'
       ;;
     aki-project-audit)
-      echo '  中文：使用 `aki-project-audit` 全面审计当前项目。'
-      echo '  English: Use `aki-project-audit` to audit the current project.'
+      echo '  使用 `aki-project-audit` 全面审计当前项目。'
+      echo '  Use `aki-project-audit` to audit the current project.'
       ;;
     aki-open-source-audit)
-      echo '  中文：使用 `aki-open-source-audit` 做开源前审计。'
-      echo '  English: Use `aki-open-source-audit` before making the repository public.'
+      echo '  使用 `aki-open-source-audit` 做开源前审计。'
+      echo '  Use `aki-open-source-audit` before making the repository public.'
       ;;
     aki-game-playtest-audit)
-      echo '  中文：使用 `aki-game-playtest-audit` 从玩家路径审计当前游戏。'
-      echo '  English: Use `aki-game-playtest-audit` to audit the game from the player path.'
+      echo '  使用 `aki-game-playtest-audit` 从玩家路径审计当前游戏。'
+      echo '  Use `aki-game-playtest-audit` to audit the game from the player path.'
       ;;
     aki-project-handoff)
-      echo '  中文：使用 `aki-project-handoff` 接管或交接当前项目。'
-      echo '  English: Use `aki-project-handoff` to take over or hand off the current project.'
+      echo '  使用 `aki-project-handoff` 接管或交接当前项目。'
+      echo '  Use `aki-project-handoff` to take over or hand off the current project.'
       ;;
     aki-rednote-cover)
-      echo '  中文：使用 `aki-rednote-cover` 为当前内容生成封面。'
-      echo '  English: Use `aki-rednote-cover` to generate covers for the current content.'
+      echo '  使用 `aki-rednote-cover` 为当前内容生成封面。'
+      echo '  Use `aki-rednote-cover` to generate covers for the current content.'
       ;;
   esac
 done
