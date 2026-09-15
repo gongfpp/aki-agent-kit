@@ -27,31 +27,52 @@
 
 - `aki-project-bootstrap`：幂等接入个人开发原则，只维护项目 `AGENTS.md` 中自己的 managed region。
 - `aki-context-sync`：审计开发会话与项目事实，把真正值得长期保存的隐性上下文同步进权威文档。
-- `aki-github-readme`：生成、重写和审查 GitHub README。
-- `aki-rednote-cover`：生成“城下秋草”统一视觉的小红书封面。
+- `aki-project-readme`：生成、重写和审查项目 README。
+- `aki-rednote-cover`：生成“城下秋草”统一视觉的小红书封面；属于个人专用 Skill，不在默认安装集合中。
 
 ## 用户级安装
 
-将全部 Skill 安装到用户级目录 `~/.agents/skills`：
+直接运行安装器时会让用户选择需要的 Skill 集合：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh | bash
 ```
 
-安装器会复制真实目录而不是创建符号链接；重复执行同一条命令即可从 `main` 更新，并清理已经从本仓库删除的受管 Skill。已有同名但并非本安装器管理的目录不会被覆盖。
+预设集合：
 
-Codex 当前官方的 USER scope 就是 `$HOME/.agents/skills`，因此默认命令已经适用于 Codex。其他平台如果使用不同的用户级 Skill 目录，通过 `AKI_SKILLS_DIR` 指定：
+- `core`：`aki-project-bootstrap` + `aki-context-sync`
+- `project`：`core` + `aki-project-readme`，推荐给大多数项目开发场景
+- `all`：安装仓库内全部 Skill，包括个人专用的 `aki-rednote-cover`
+- `custom`：逐项选择需要安装的 Skill
+
+没有交互终端时，安装器默认使用 `project`。也可以显式指定：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
-  | AKI_SKILLS_DIR="/path/to/skills" bash
+  | bash -s -- --set core
+```
+
+或者指定精确集合：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
+  | bash -s -- --skills aki-project-bootstrap,aki-context-sync,aki-project-readme
+```
+
+安装器把所选集合视为最终受管状态：重复执行会更新已选 Skill，并清理此前由本安装器管理、但本次没有选择的 Skill。已有同名但并非本安装器管理的目录不会被覆盖。
+
+默认安装目录是 `~/.agents/skills`，适用于 Codex 当前 USER scope。其他平台如果使用不同目录，通过 `AKI_SKILLS_DIR` 指定：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
+  | AKI_SKILLS_DIR="/path/to/skills" bash -s -- --set project
 ```
 
 ## 使用方式
 
-安装完成后，在任意项目里可以直接调用 Skill 名称，无需再次提供 GitHub 地址。
+安装完成后，在任意项目里可以直接调用已安装的 Skill 名称，无需再次提供 GitHub 地址。
 
-项目首次接入个人开发原则时使用 `aki-project-bootstrap`。多轮开发后需要沉淀隐性决策和非显然约束时使用 `aki-context-sync`。
+项目首次接入个人开发原则时使用 `aki-project-bootstrap`。多轮开发后需要沉淀隐性决策和非显然约束时使用 `aki-context-sync`。需要完善项目入口文档时使用 `aki-project-readme`。
 
 项目精简审计直接使用 `principles/simplification.md`；游戏项目同时使用 `principles/game-simplification.md`。
 
@@ -78,7 +99,7 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
     │   └── assets/AGENTS.md
     ├── aki-context-sync/
     │   └── SKILL.md
-    ├── aki-github-readme/
+    ├── aki-project-readme/
     │   └── SKILL.md
     └── aki-rednote-cover/
         └── SKILL.md
