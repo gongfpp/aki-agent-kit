@@ -15,7 +15,7 @@ description: 初始化或升级软件/独立游戏项目的 AGENTS.md，引入�
 
 唯一稳定入口是：
 
-https://github.com/gongfpp/aki-skills/raw/refs/heads/main/agent-rules.yaml
+https://github.com/gongfpp/aki-skills/blob/main/agent-rules.yaml?raw=1
 
 该清单负责声明当前中央规则的 URL、加载条件和继承关系。以后规则文件改路径时，优先只更新清单，不让所有项目 bootstrap 跟着变化。
 

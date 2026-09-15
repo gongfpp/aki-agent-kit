@@ -7,7 +7,7 @@
 每个**新会话**开始、在进行实质性规划或修改代码之前：
 
 1. 先读取中央规则清单：
-   - https://github.com/gongfpp/aki-skills/raw/refs/heads/main/agent-rules.yaml
+   - https://github.com/gongfpp/aki-skills/blob/main/agent-rules.yaml?raw=1
 2. 根据 `Project Profile` 从清单中读取对应的最新规则：
    - `project`：加载 `project`；
    - `game`：加载 `project` + `game`；
