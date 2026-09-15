@@ -14,6 +14,14 @@
 - 核心玩法尚未稳定时，不为多人、Mod、DLC、大世界或大规模角色等未发生需求提前建设架构。
 - 抽象和数据化来自真实重复与变化压力，不来自想象中的未来规模。
 
+## 游戏目录与内容组织
+
+- 游戏项目的具体目录树属于项目事实，不强制统一采用 `Scenes/Scripts/Resources/Assets/UI/Audio/Data` 等固定命名；优先遵循引擎约定和项目已有结构。
+- Scene、Script、Resource、Asset、UI、Audio、Data、Save、生成物和导入产物的边界如果会影响未来放置位置，应在项目本地形成明确规则。
+- 可从引擎和目录树直接推导的结构不重复写文档；只有非显然的资源归属、跨场景共享、生成/手写边界、命名与放置限制才需要长期记录。
+- 简短放置约束可以进入项目 `AGENTS.md`；详细目录职责优先进入项目已有架构/GDD 文档，没有合适事实源时再使用 `docs/project-structure.md`。
+- 调整目录前先检查场景序列化路径、Resource 引用、Import、Animation、Input、Localization、Save Schema 和编辑器配置，避免把文件移动当成普通文件系统重构。
+
 ## 游戏状态与场景生命周期
 
 - Player、UI、GameManager、关卡和存档不得分别维护同一事实的独立真相。

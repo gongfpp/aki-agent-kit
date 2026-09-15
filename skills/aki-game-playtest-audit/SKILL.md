@@ -22,6 +22,12 @@ description: 从真实玩家路径出发审计独立游戏的可玩性、交互�
 
 如果无法实际运行，不得声称“已试玩”；必须把静态推断和实际观察分开。
 
+## Godot 与 gda
+
+Godot 项目已安装 `gda` Skill 和 CLI 时，优先用它获取 runtime evidence：场景 validate/preflight、运行时 scene tree、输入模拟、frame capture、日志/错误和性能数据都可以作为 **Observed** 证据。
+
+不要因为存在 `gda` Skill 就假设 CLI 可用；先确认 `gda` 命令和目标 Godot 项目能够工作。无法使用时退回项目现有运行方式，并明确缺失的验证能力。
+
 ## 玩家路径
 
 根据项目真实结构选择路径，通常至少覆盖：
@@ -50,7 +56,7 @@ description: 从真实玩家路径出发审计独立游戏的可玩性、交互�
 ## 工作流
 
 1. 读取游戏项目事实、输入方式和当前目标玩家路径。
-2. 能运行时从干净启动开始，不跳过首次体验。
+2. 能运行时从干净启动开始，不跳过首次体验；Godot 项目优先使用可用的 `gda` runtime 能力建立可复现证据。
 3. 对关键路径记录操作、预期、实际结果和阻断点。
 4. 对问题读取相关场景、资源、UI 和代码，区分表现问题与系统根因。
 5. 优先保留能稳定复现、明显影响体验的问题。
@@ -73,6 +79,6 @@ description: 从真实玩家路径出发审计独立游戏的可玩性、交互�
 
 用户要求修改时，遵循项目游戏开发原则和 Git 原则；修复后必须重新走受影响的玩家路径，代码测试不能替代实际试玩。
 
-## 与 Superpowers 协作
+## 与外部能力协作
 
-本 Skill 独立可用。Superpowers 的 systematic debugging、TDD 和 verification 可以辅助定位与修复确定性问题，但不能替代真实玩家路径验证。
+`gda` 负责 Godot 自动化和 runtime evidence；本 Skill 负责定义玩家路径、判断体验问题和验收标准。Superpowers 的 systematic debugging、TDD 和 verification 可以辅助定位与修复确定性问题，但不能替代真实玩家路径验证。
