@@ -32,7 +32,7 @@
 
 ## 用户级安装
 
-将全部 Skill 安装到通用用户级目录 `~/.agents/skills`：
+将全部 Skill 安装到用户级目录 `~/.agents/skills`：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh | bash
@@ -40,11 +40,11 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 
 安装器会复制真实目录而不是创建符号链接；重复执行同一条命令即可从 `main` 更新，并清理已经从本仓库删除的受管 Skill。已有同名但并非本安装器管理的目录不会被覆盖。
 
-如果某个平台使用其他用户级 Skill 目录，通过 `AKI_SKILLS_DIR` 指定。例如 Codex 可安装到 `$CODEX_HOME/skills`（默认 `~/.codex/skills`）：
+Codex 当前官方的 USER scope 就是 `$HOME/.agents/skills`，因此默认命令已经适用于 Codex。其他平台如果使用不同的用户级 Skill 目录，通过 `AKI_SKILLS_DIR` 指定：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
-  | AKI_SKILLS_DIR="${CODEX_HOME:-$HOME/.codex}/skills" bash
+  | AKI_SKILLS_DIR="/path/to/skills" bash
 ```
 
 ## 使用方式
