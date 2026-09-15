@@ -32,34 +32,64 @@
 
 ## 用户级安装
 
-直接运行安装器时会让用户选择需要的 Skill 集合：
+无参数命令固定安装推荐的 `project` 集合，不会进入交互选择：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh | bash
 ```
 
-预设集合：
+`project` 包含：
 
-- `core`：`aki-project-bootstrap` + `aki-context-sync`
-- `project`：`core` + `aki-project-readme`，推荐给大多数项目开发场景
-- `all`：安装仓库内全部 Skill，包括个人专用的 `aki-rednote-cover`
-- `custom`：逐项选择需要安装的 Skill
+- `aki-project-bootstrap`
+- `aki-context-sync`
+- `aki-project-readme`
 
-没有交互终端时，安装器默认使用 `project`。也可以显式指定：
+其他集合通过参数显式选择：
+
+### core
+
+只安装项目初始化与上下文同步：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
   | bash -s -- --set core
 ```
 
-或者指定精确集合：
+### project
+
+显式安装推荐集合，与无参数命令等价：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
-  | bash -s -- --skills aki-project-bootstrap,aki-context-sync,aki-project-readme
+  | bash -s -- --set project
 ```
 
-安装器把所选集合视为最终受管状态：重复执行会更新已选 Skill，并清理此前由本安装器管理、但本次没有选择的 Skill。已有同名但并非本安装器管理的目录不会被覆盖。
+### all
+
+安装仓库内全部 Skill，包括个人专用的 `aki-rednote-cover`：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
+  | bash -s -- --set all
+```
+
+### 精确选择
+
+通过 `--skills` 指定最终受管 Skill 集合：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
+  | bash -s -- --skills aki-project-bootstrap,aki-context-sync
+```
+
+查看可用集合与 Skill：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
+  | bash -s -- --list
+```
+
+安装器把所选集合视为最终受管状态：重复执行会更新已选 Skill，并清理此前由本安装器管理、但本次未选择的 Skill。已有同名但并非本安装器管理的目录不会被覆盖。
 
 默认安装目录是 `~/.agents/skills`，适用于 Codex 当前 USER scope。其他平台如果使用不同目录，通过 `AKI_SKILLS_DIR` 指定：
 

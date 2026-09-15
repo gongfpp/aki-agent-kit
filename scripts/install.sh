@@ -13,12 +13,10 @@ usage() {
 aki-agent-kit Skill 安装器 / Skill Installer
 
 用法 / Usage:
-  install.sh                         交互选择预设；无 TTY 时默认 project
-                                     Choose a preset interactively; defaults to project without a TTY
+  install.sh                         安装 project 集合（默认） / Install the project preset (default)
   install.sh --set core              安装 core 集合 / Install the core preset
   install.sh --set project           安装 project 集合 / Install the project preset
   install.sh --set all               安装全部 Skill / Install all Skills
-  install.sh --set custom            交互逐项选择 / Choose Skills interactively
   install.sh --skills a,b,c          指定最终受管 Skill 集合 / Set the exact managed Skill set
   install.sh --list                  查看预设与可用 Skill / List presets and available Skills
   install.sh --help                  显示帮助 / Show help
@@ -63,6 +61,10 @@ done
 if [ -n "$REQUESTED_SET" ] && [ -n "$REQUESTED_SKILLS" ]; then
   echo "错误 / Error: --set 与 --skills 不能同时使用 / cannot be used together." >&2
   exit 1
+fi
+
+if [ -z "$REQUESTED_SET" ] && [ -z "$REQUESTED_SKILLS" ]; then
+  REQUESTED_SET="project"
 fi
 
 if ! command -v git >/dev/null 2>&1; then
@@ -115,18 +117,18 @@ print_presets() {
   cat <<'TXT'
 预设集合 / Presets:
   core     = aki-project-bootstrap + aki-context-sync
-  project  = core + aki-project-readme（推荐 / recommended）
+  project  = core + aki-project-readme（默认 / default）
   all      = 仓库内全部 Skill，包含个人专用项 / all repository Skills, including personal Skills
-  custom   = 逐个选择 / choose individual Skills
+
+精确选择 / Exact selection:
+  使用 --skills skill-a,skill-b / Use --skills skill-a,skill-b
 TXT
 }
 
 print_available() {
   echo "可用 Skill / Available Skills:"
-  i=1
   for name in "${AVAILABLE_SKILLS[@]}"; do
-    echo "  $i) $name — $(skill_summary "$name")"
-    i=$((i + 1))
+    echo "  - $name — $(skill_summary "$name")"
   done
 }
 
@@ -149,70 +151,12 @@ add_selected() {
   fi
 }
 
-choose_custom() {
-  if [ ! -t 1 ] || [ ! -r /dev/tty ]; then
-    echo "错误 / Error: custom 需要交互终端；非交互环境请使用 --skills / custom requires a TTY; use --skills in non-interactive environments." >&2
-    exit 1
-  fi
-
-  {
-    echo
-    print_available
-    echo
-    echo "输入编号，逗号分隔，例如 1,2,3 / Enter numbers separated by commas, e.g. 1,2,3:"
-  } >/dev/tty
-
-  read -r answer </dev/tty
-  answer="$(printf '%s' "$answer" | tr -d ' ')"
-  [ -n "$answer" ] || { echo "错误 / Error: 未选择任何 Skill / No Skill selected." >&2; exit 1; }
-
-  old_ifs="$IFS"
-  IFS=','
-  for index in $answer; do
-    case "$index" in
-      ''|*[!0-9]*) echo "错误 / Error: 无效编号 / Invalid selection: $index" >&2; exit 1 ;;
-    esac
-    if [ "$index" -lt 1 ] || [ "$index" -gt "${#AVAILABLE_SKILLS[@]}" ]; then
-      echo "错误 / Error: 编号超出范围 / Selection out of range: $index" >&2
-      exit 1
-    fi
-    add_selected "${AVAILABLE_SKILLS[$((index - 1))]}"
-  done
-  IFS="$old_ifs"
-}
-
 if [ -n "$REQUESTED_SKILLS" ]; then
   normalized="$(printf '%s' "$REQUESTED_SKILLS" | tr ',' ' ')"
   for name in $normalized; do
     add_selected "$name"
   done
 else
-  if [ -z "$REQUESTED_SET" ]; then
-    if [ -t 1 ] && [ -r /dev/tty ]; then
-      {
-        print_presets
-        echo
-        echo "选择集合 / Choose preset [project]:"
-        echo "  1) core"
-        echo "  2) project"
-        echo "  3) all"
-        echo "  4) custom"
-      } >/dev/tty
-      read -r choice </dev/tty
-      case "${choice:-2}" in
-        1|core) REQUESTED_SET="core" ;;
-        2|project|'') REQUESTED_SET="project" ;;
-        3|all) REQUESTED_SET="all" ;;
-        4|custom) REQUESTED_SET="custom" ;;
-        *) echo "错误 / Error: 无效选择 / Invalid choice: $choice" >&2; exit 1 ;;
-      esac
-    else
-      REQUESTED_SET="project"
-      echo "未检测到交互终端，使用默认集合 project / No interactive TTY detected; using the project preset."
-      echo
-    fi
-  fi
-
   case "$REQUESTED_SET" in
     core)
       add_selected "aki-project-bootstrap"
@@ -225,9 +169,6 @@ else
       ;;
     all)
       for name in "${AVAILABLE_SKILLS[@]}"; do add_selected "$name"; done
-      ;;
-    custom)
-      choose_custom
       ;;
     *)
       echo "错误 / Error: 未知集合 / Unknown preset: $REQUESTED_SET" >&2
@@ -323,5 +264,5 @@ echo
 echo "提示 / Tip: 如果当前 Agent 会话没有发现新安装的 Skill，请新建会话或重启 Agent。"
 echo "Tip: If the current Agent session does not discover the newly installed Skills, start a new session or restart the Agent."
 echo
-echo "更新 / Update: 以后重复运行安装器并选择目标集合，即可更新并收敛受管 Skill。"
-echo "Update: Rerun the installer and choose the desired set to update and converge the managed Skills."
+echo "更新 / Update: 以后重复运行安装器并使用相同参数，即可更新并收敛受管 Skill。"
+echo "Update: Rerun the installer with the same parameters to update and converge the managed Skills."

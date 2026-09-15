@@ -31,16 +31,18 @@ bash scripts/install.sh
 curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh | bash
 ```
 
-安装器提供以下 preset：
+无参数执行固定安装 `project` 集合：`aki-project-bootstrap`、`aki-context-sync`、`aki-project-readme`。安装器不进行交互式选择。
 
-- `core`：`aki-project-bootstrap` + `aki-context-sync`
-- `project`：`core` + `aki-project-readme`，作为大多数开发场景的推荐集合
-- `all`：仓库内全部 Skill，包括个人专用 Skill
-- `custom`：由用户逐项选择
+用户需要其他集合时使用 README 中的显式参数：
 
-用户未指定集合且存在交互终端时，让安装器展示 preset 供用户选择；没有交互终端时使用 `project`。用户明确指定 Skill 时使用 `--skills`，不要自动扩大安装范围。
+- `--set core`：只安装 `aki-project-bootstrap` + `aki-context-sync`
+- `--set project`：安装默认推荐集合
+- `--set all`：安装仓库内全部 Skill，包括个人专用 Skill
+- `--skills a,b,c`：安装用户明确指定的最终受管 Skill 集合
 
-`aki-rednote-cover` 属于个人专用 Skill，只在 `all` 或用户明确选择时安装。
+用户没有指定集合时直接使用默认 `project`，不要额外询问。用户明确指定 Skill 时使用 `--skills`，不要自动扩大安装范围。
+
+`aki-rednote-cover` 属于个人专用 Skill，只在 `all` 或用户通过 `--skills` 明确指定时安装。
 
 默认安装到用户级 `~/.agents/skills`。用户或目标平台明确要求其他 Skill 目录时，通过 `AKI_SKILLS_DIR` 指定。安装、更新和受管 Skill 收敛都复用同一脚本；所选集合代表最终受管状态，未被选择的受管 Skill 会被清理。
 
@@ -92,7 +94,7 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 - README 目录结构与真实仓库一致；
 - 所有引用指向当前存在的 canonical 文件；
 - 安装说明与 `scripts/install.sh` 的真实行为一致；
-- 安装 preset 不把个人专用 Skill 混入通用默认集合；
+- 默认安装集合不包含个人专用 Skill；
 - 平台专属 metadata 具有真实用途；
 - 修改型 Skill 的所有权和幂等边界明确；
 - 当前目录只保留仍有行为价值的内容。
