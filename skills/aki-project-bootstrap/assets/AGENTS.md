@@ -13,7 +13,7 @@ Project profile: `{{PROJECT_PROFILE}}`
    https://github.com/gongfpp/aki-agent-kit/blob/main/principles/game-development.md?raw=1
 3. 在 Git 仓库内，当前会话第一次执行会写入项目文件的任务前读取 Git 原则：
    https://github.com/gongfpp/aki-agent-kit/blob/main/principles/git.md?raw=1
-   任务完成并验证后按该原则完成 commit、可用远端的正常 push 和仓库既有合并流程。除非用户明确要求保留本地未提交或未推送状态，不把“是否提交”“是否 push”作为例行确认问题。
+   任务完成并验证后按该原则完成本地版本管理收尾。是否 push、创建 PR 或执行其他远端操作，由当前项目指令、仓库既有流程和当次任务决定。
 4. 只有在精简、清理、架构收敛或删除无用复杂度的任务中读取：
    https://github.com/gongfpp/aki-agent-kit/blob/main/principles/simplification.md?raw=1
    如果 profile 为 `game`，同时读取：
