@@ -55,7 +55,7 @@ region 外已有内容属于项目本身，不重写、重新排序或格式化�
 2. 判断 `project` 或 `game` profile。
 3. 读取模板并验证当前 profile 需要的 principle URL。
 4. 检查 managed region：不存在则插入一份；存在且配对正确则只更新 region 内部。
-5. 对能够明确识别为本 Skill 管理的旧 bootstrap 内容进行收敛，项目特有内容全部保留。
+5. 如果 region 外存在与当前 bootstrap 语义等价的中央 boilerplate，收敛为唯一 canonical region；项目特有内容全部保留。
 6. 检查没有重复 region、重复原则正文或失效 URL。
 7. 用相同输入再次计算目标结果，第二次必须与第一次完全一致。
 
