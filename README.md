@@ -18,14 +18,14 @@
 
 ## Principles
 
-- `principles/project-development.md`：普通软件项目开发基线，同时规定项目目录规范如何在项目本地形成和维护。
-- `principles/game-development.md`：独立游戏项目补充原则，包括游戏资源与目录组织边界。
-- `principles/git.md`：Git 版本管理原则。
+- `principles/project-development.md`：跨项目开发基线、判断边界和项目结构形成原则。
+- `principles/game-development.md`：独立游戏项目补充，包括玩家路径、数据驱动、内容/资源职责和游戏文档语义。
+- `principles/git.md`：Git 版本管理与仓库卫生原则。
 - `principles/simplification.md`：通用项目精简审计。
 - `principles/game-simplification.md`：游戏项目精简补充。
 - `principles/skill-authoring.md`：Skill 内容质量与维护原则。
 
-具体项目的目录树不放在 aki-agent-kit。简短放置规则进入项目 `AGENTS.md`；详细目录职责进入项目已有架构文档，没有合适事实源且确有长期价值时可使用 `docs/project-structure.md`。稳定后由 `aki-context-sync` 收敛，避免中央模板覆盖真实项目结构。
+中央原则只提供跨项目默认判断，不替项目决定具体技术栈、架构模式、目录树或业务/玩法逻辑。具体项目契约和真实实现优先。
 
 ## 本仓库 Skills
 
@@ -36,88 +36,46 @@
 - `aki-open-source-audit`：仓库公开前检查敏感信息、Git 历史、许可证和第三方资产。
 - `aki-game-playtest-audit`：从真实玩家路径审计游戏可玩性、反馈、节奏和失败恢复。
 - `aki-grill-with-context`：使用上游 `grilling` 深度澄清决策，再由 `aki-context-sync` 把长期结论收敛进现有项目事实源。
-- `aki-rednote-cover`：生成“城下秋草”统一视觉的小红书封面；属于个人专用 Skill，不在通用默认集合中。
+- `aki-rednote-cover`：个人专用的小红书封面 Skill。
 
-## 外部 Skills
-
-安装器直接从上游安装，不在本仓库复制维护：
-
-- Matt Pocock：`grill-me`、`grilling`、`handoff`、`retro`、`writing-for-agents`。
-- aigengame：`gda`。
-
-`grill-me` 是用户入口，底层调用 `grilling`。`retro` 当前位于 Matt 仓库的 in-progress 区域，并依赖 `writing-for-agents`；安装器会自动补齐依赖。
-
-`gda` Skill 需要同名 CLI 才能真正驱动 Godot。安装器检测到本机 `gda` 时优先通过 `gda skill` 生成与 CLI 版本匹配的 Skill；未检测到时安装当前官方 Skill，并提示通过 `uv tool install gda` 安装 CLI。
+外部 Skill 的来源、依赖和 preset 组成统一定义在 `scripts/skills.catalog.sh`，安装器运行时读取该 catalog，不在 README 和安装逻辑里维护第二份精确清单。
 
 ## 用户级安装
 
-无参数命令固定安装推荐的 `project` 集合：
+无参数命令安装默认 `project` preset：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh | bash
 ```
 
-`project` 包含：
+当前提供的 preset 面向不同场景：
 
-- `aki-project-bootstrap`
-- `aki-context-sync`
-- `aki-project-readme`
-- `aki-project-audit`
-- `aki-grill-with-context`
-- `grill-me` + `grilling`
-- `handoff`
-- `retro` + `writing-for-agents`
+- `core`：最小项目基础能力；
+- `project`：普通软件项目默认集合；
+- `game`：通用游戏开发能力，不绑定具体引擎；
+- `godot`：在 `game` 基础上加入 Godot 自动化能力；
+- `opensource`：普通项目能力加开源前审计；
+- `all`：全部受管 Skill，包括个人专用项。
 
-### core
-
-只安装最小项目基础能力：
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
-  | bash -s -- --set core
-```
-
-### game
-
-在 `project` 基础上增加 `aki-game-playtest-audit` 和官方 `gda`：
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
-  | bash -s -- --set game
-```
-
-### opensource
-
-在 `project` 基础上增加 `aki-open-source-audit`：
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
-  | bash -s -- --set opensource
-```
-
-### all
-
-安装全部本仓库与外部 Skill，包括个人专用 `aki-rednote-cover`：
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
-  | bash -s -- --set all
-```
-
-### 精确选择
-
-通过 `--skills` 指定需要的 Skill；依赖会自动补齐：
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
-  | bash -s -- --skills grill-me,handoff,aki-context-sync
-```
-
-查看可用集合与 Skill：
+preset 的**精确组成以安装器当前 catalog 为准**。查看当前集合、Skill 和说明：
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
   | bash -s -- --list
+```
+
+选择 preset：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
+  | bash -s -- --set godot
+```
+
+精确选择 Skill；必要依赖会自动补齐：
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
+  | bash -s -- --skills grill-me,handoff,aki-context-sync
 ```
 
 安装器把最终选择视为受管状态：重复执行会更新已选 Skill，并清理此前由本安装器管理、但本次未选择的 Skill。已有同名但并非本安装器管理的目录不会被覆盖。
@@ -142,9 +100,9 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 
 ## 与 grill-with-docs 的边界
 
-Matt 的 `grill-with-docs` 会组合 `grilling + domain-modeling`，并让 domain-modeling 维护 `CONTEXT.md` 和 ADR。本仓库不直接安装它，因为这会与 `aki-context-sync` 的事实源选择和去重规则形成第二套持久化机制。
+Matt 的 `grill-with-docs` 会组合 `grilling + domain-modeling`，并维护独立的领域上下文/决策文档体系。本仓库不直接安装它，因为这会与 `aki-context-sync` 的事实源选择和去重规则形成第二套持久化机制。
 
-`aki-grill-with-context` 保留 `grilling` 的决策树式澄清，但把持久化阶段替换为 `aki-context-sync`：只有用户确认 shared understanding 后，才把真正长期有效且难以重建的结论写入项目现有 `AGENTS.md`、架构文档、GDD、接口文档或其他权威事实源。
+`aki-grill-with-context` 保留 `grilling` 的决策树式澄清，但把持久化阶段交给 `aki-context-sync`：只有用户确认 shared understanding 后，才把真正长期有效且难以重建的结论合并到项目已经存在的权威事实源。
 
 ## 目录
 
@@ -155,7 +113,8 @@ Matt 的 `grill-with-docs` 会组合 `grilling + domain-modeling`，并让 domai
 ├── assets/
 ├── principles/
 ├── scripts/
-│   └── install.sh
+│   ├── install.sh
+│   └── skills.catalog.sh
 └── skills/
     ├── aki-project-bootstrap/
     ├── aki-context-sync/
@@ -173,6 +132,7 @@ Matt 的 `grill-with-docs` 会组合 `grilling + domain-modeling`，并让 domai
 
 - 通用格式、发现和生态能力优先采用上游标准。
 - 能直接依赖成熟上游时不复制实现；只有个人行为差异才创建 `aki-*` adapter。
+- preset、外部来源和 Skill-to-Skill 依赖以 `scripts/skills.catalog.sh` 为机器权威来源；`install.sh` 只负责执行安装和收敛。
 - 当前文档只表达当前有效状态；版本历史由 Git 保存。
 - 修改型 Skill 保持幂等，相同输入和项目状态下第二次执行产生零 diff。
 - 新内容只有在能改变 Agent 的判断、执行或验收时才进入仓库。
