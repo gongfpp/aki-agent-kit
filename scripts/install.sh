@@ -11,40 +11,110 @@ MATT_REF="${AKI_MATT_SKILLS_REF:-main}"
 GDA_REPO="${AKI_GDA_REPO:-https://github.com/aigengame/godot-agent.git}"
 GDA_REF="${AKI_GDA_REF:-main}"
 LIST_ONLY=0
+VERBOSE="${AKI_INSTALL_VERBOSE:-0}"
+
+# Keep the installer readable in interactive terminals without polluting logs or NO_COLOR environments.
+if [ -t 1 ] && [ "${TERM:-}" != "dumb" ] && [ -z "${NO_COLOR:-}" ]; then
+  BOLD='\033[1m'
+  DIM='\033[2m'
+  CYAN='\033[36m'
+  GREEN='\033[32m'
+  YELLOW='\033[33m'
+  RED='\033[31m'
+  RESET='\033[0m'
+else
+  BOLD=''
+  DIM=''
+  CYAN=''
+  GREEN=''
+  YELLOW=''
+  RED=''
+  RESET=''
+fi
+
+ui_title() {
+  printf '\n%baki-agent-kit%b\n' "$BOLD" "$RESET"
+  printf '%bSkill Installer%b\n' "$DIM" "$RESET"
+}
+
+ui_section() {
+  printf '\n%b==>%b %s\n' "$CYAN$BOLD" "$RESET" "$1"
+}
+
+ui_kv() {
+  printf '    %-12s %s\n' "$1" "$2"
+}
+
+ui_ok() {
+  printf '  %b✓%b %-30s %b%s%b\n' "$GREEN" "$RESET" "$1" "$DIM" "$2" "$RESET"
+}
+
+ui_info() {
+  printf '  %b·%b %s\n' "$CYAN" "$RESET" "$1"
+}
+
+ui_warn() {
+  printf '  %b!%b %s\n' "$YELLOW" "$RESET" "$1"
+}
+
+ui_error() {
+  printf '%b✗%b %s\n' "$RED" "$RESET" "$1" >&2
+}
+
+display_path() {
+  case "$1" in
+    "$HOME") printf '~' ;;
+    "$HOME"/*) printf '~/%s' "${1#"$HOME"/}" ;;
+    *) printf '%s' "$1" ;;
+  esac
+}
+
+count_skills() {
+  local list="$1"
+  local count=0
+  local item
+  for item in $list; do
+    count=$((count + 1))
+  done
+  printf '%s' "$count"
+}
 
 usage() {
   cat <<'TXT'
-aki-agent-kit Skill 安装器 / Skill Installer
+aki-agent-kit Skill Installer
 
-用法 / Usage:
-  install.sh                         安装 project 集合（默认） / Install the project preset (default)
-  install.sh --set core              安装 core 集合 / Install the core preset
-  install.sh --set project           安装 project 集合 / Install the project preset
-  install.sh --set game              安装 game 集合 / Install the game preset
-  install.sh --set opensource        安装 opensource 集合 / Install the open-source preset
-  install.sh --set all               安装全部 Skill / Install all Skills
-  install.sh --skills a,b,c          指定 Skill；依赖自动补齐 / Select Skills; dependencies are added automatically
-  install.sh --list                  查看预设与可用 Skill / List presets and available Skills
-  install.sh --help                  显示帮助 / Show help
+Usage:
+  install.sh                       project preset (default)
+  install.sh --set core            minimal project baseline
+  install.sh --set project         default software project set
+  install.sh --set game            project + game playtest + gda
+  install.sh --set opensource      project + open-source audit
+  install.sh --set all             all managed Skills
+  install.sh --skills a,b,c        exact Skills; dependencies auto-added
+  install.sh --list                list presets and Skills
+  install.sh -v, --verbose         show source and selected Skill details
+  install.sh -h, --help            show help
 
-环境变量 / Environment:
-  AKI_SKILLS_DIR       安装目录，默认 ~/.agents/skills / Destination directory
-  AKI_SKILL_SET        等价于 --set / Same as --set
-  AKI_SKILLS           等价于 --skills / Same as --skills
-  AKI_AGENT_KIT_REPO   aki-agent-kit 源仓库 / aki-agent-kit source repository
-  AKI_AGENT_KIT_REF    aki-agent-kit Git ref，默认 main / Git ref, default main
+Environment:
+  AKI_SKILLS_DIR       destination, default ~/.agents/skills
+  AKI_SKILL_SET        same as --set
+  AKI_SKILLS           same as --skills
+  AKI_AGENT_KIT_REPO   source repository
+  AKI_AGENT_KIT_REF    source Git ref, default main
+  AKI_INSTALL_VERBOSE  set to 1 for verbose output
+  NO_COLOR             disable ANSI colors
 TXT
 }
 
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --set)
-      [ "$#" -ge 2 ] || { echo "错误 / Error: --set 需要参数 / requires a value." >&2; exit 1; }
+      [ "$#" -ge 2 ] || { ui_error "--set 需要参数 / requires a value"; exit 1; }
       REQUESTED_SET="$2"
       shift 2
       ;;
     --skills)
-      [ "$#" -ge 2 ] || { echo "错误 / Error: --skills 需要参数 / requires a value." >&2; exit 1; }
+      [ "$#" -ge 2 ] || { ui_error "--skills 需要参数 / requires a value"; exit 1; }
       REQUESTED_SKILLS="$2"
       shift 2
       ;;
@@ -52,12 +122,16 @@ while [ "$#" -gt 0 ]; do
       LIST_ONLY=1
       shift
       ;;
+    --verbose|-v)
+      VERBOSE=1
+      shift
+      ;;
     --help|-h)
       usage
       exit 0
       ;;
     *)
-      echo "错误 / Error: 未知参数 / Unknown option: $1" >&2
+      ui_error "未知参数 / Unknown option: $1"
       usage >&2
       exit 1
       ;;
@@ -65,7 +139,7 @@ while [ "$#" -gt 0 ]; do
 done
 
 if [ -n "$REQUESTED_SET" ] && [ -n "$REQUESTED_SKILLS" ]; then
-  echo "错误 / Error: --set 与 --skills 不能同时使用 / cannot be used together." >&2
+  ui_error "--set 与 --skills 不能同时使用 / cannot be used together"
   exit 1
 fi
 
@@ -74,7 +148,7 @@ if [ -z "$REQUESTED_SET" ] && [ -z "$REQUESTED_SKILLS" ]; then
 fi
 
 if ! command -v git >/dev/null 2>&1; then
-  echo "错误 / Error: 需要先安装 Git / Git is required." >&2
+  ui_error "需要先安装 Git / Git is required"
   exit 1
 fi
 
@@ -82,14 +156,10 @@ mkdir -p "$DEST_DIR"
 tmp_dir="$(mktemp -d "${TMPDIR:-/tmp}/aki-agent-kit.XXXXXX")"
 trap 'rm -rf "$tmp_dir"' EXIT
 
-echo "aki-agent-kit Skill 安装器 / Skill Installer"
-echo "源 / Source: $REPO_URL"
-echo "版本 / Ref: $REF"
-echo "目标目录 / Destination: $DEST_DIR"
-echo
-
+ui_title
+ui_info "读取 Skill catalog / Loading catalog"
 if ! git clone --quiet --depth 1 --branch "$REF" "$REPO_URL" "$tmp_dir/repo"; then
-  echo "错误 / Error: 无法读取 aki-agent-kit / Failed to fetch aki-agent-kit." >&2
+  ui_error "无法读取 aki-agent-kit / Failed to fetch aki-agent-kit"
   exit 1
 fi
 
@@ -126,52 +196,43 @@ contains_skill() {
 
 skill_summary() {
   case "$1" in
-    aki-project-bootstrap) echo "项目接入与 AGENTS.md 初始化 / Project bootstrap and AGENTS.md setup" ;;
-    aki-context-sync) echo "会话上下文持久化与文档收敛 / Session context consolidation" ;;
-    aki-project-readme) echo "项目 README 生成、审查与维护 / Project README generation and review" ;;
-    aki-project-audit) echo "项目全面审计 / Full project audit" ;;
-    aki-open-source-audit) echo "开源前安全与合规审计 / Pre-open-source audit" ;;
-    aki-game-playtest-audit) echo "游戏玩家路径与试玩审计 / Game playtest audit" ;;
-    aki-grill-with-context) echo "Grilling + aki-context-sync 决策收敛 / Grilling + context sync" ;;
-    aki-rednote-cover) echo "小红书封面生成（个人专用） / Rednote cover generation (personal)" ;;
-    grill-me) echo "深度追问计划与设计（Matt Pocock） / Relentless plan and design interview" ;;
-    grilling) echo "grill-me 的决策树执行核心（Matt Pocock） / Decision-tree grilling primitive" ;;
-    handoff) echo "会话交接文档（Matt Pocock） / Conversation handoff" ;;
-    retro) echo "编码会话复盘（Matt Pocock, in-progress） / Coding session retrospective" ;;
-    writing-for-agents) echo "面向 Agent 的文档写作参考（Matt Pocock） / Writing reference for agents" ;;
-    gda) echo "Godot Agent CLI Skill（aigengame） / Godot automation Skill" ;;
+    aki-project-bootstrap) echo "项目接入与 AGENTS.md 初始化" ;;
+    aki-context-sync) echo "会话上下文持久化与文档收敛" ;;
+    aki-project-readme) echo "项目 README 生成、审查与维护" ;;
+    aki-project-audit) echo "项目全面审计" ;;
+    aki-open-source-audit) echo "开源前安全与合规审计" ;;
+    aki-game-playtest-audit) echo "游戏玩家路径与试玩审计" ;;
+    aki-grill-with-context) echo "Grilling + context sync 决策收敛" ;;
+    aki-rednote-cover) echo "小红书封面生成（个人专用）" ;;
+    grill-me) echo "深度追问计划与设计 · Matt Pocock" ;;
+    grilling) echo "grill-me 决策树执行核心 · Matt Pocock" ;;
+    handoff) echo "会话交接文档 · Matt Pocock" ;;
+    retro) echo "编码会话复盘 · Matt Pocock" ;;
+    writing-for-agents) echo "Agent 文档写作参考 · Matt Pocock" ;;
+    gda) echo "Godot 自动化 · aigengame" ;;
     *) echo "Skill" ;;
   esac
 }
 
 print_presets() {
-  cat <<'TXT'
-预设集合 / Presets:
-  core        = aki-project-bootstrap + aki-context-sync
-  project     = core + README/audit + grill + handoff + retro（默认 / default）
-  game        = project + aki-game-playtest-audit + gda
-  opensource  = project + aki-open-source-audit
-  all         = 全部本仓库与外部 Skill，包含个人专用项 / all local and external Skills
-
-外部 Skill / External Skills:
-  Matt Pocock: grill-me, grilling, handoff, retro, writing-for-agents
-  aigengame:   gda
-
-精确选择 / Exact selection:
-  使用 --skills skill-a,skill-b；必要依赖会自动补齐 / Dependencies are added automatically
-TXT
+  ui_section "预设 / Presets"
+  printf '  %-12s %s\n' "core" "bootstrap + context-sync"
+  printf '  %-12s %s\n' "project" "core + README/audit + grill/handoff/retro  (default)"
+  printf '  %-12s %s\n' "game" "project + playtest-audit + gda"
+  printf '  %-12s %s\n' "opensource" "project + open-source-audit"
+  printf '  %-12s %s\n' "all" "all local + external Skills"
 }
 
 print_available() {
-  echo "可用 Skill / Available Skills:"
+  ui_section "Skills"
+  local name
   for name in $AVAILABLE_SKILLS; do
-    echo "  - $name — $(skill_summary "$name")"
+    printf '  %-30s %s\n' "$name" "$(skill_summary "$name")"
   done
 }
 
 if [ "$LIST_ONLY" -eq 1 ]; then
   print_presets
-  echo
   print_available
   exit 0
 fi
@@ -179,7 +240,7 @@ fi
 add_selected() {
   local name="$1"
   if ! contains_skill "$name" "$AVAILABLE_SKILLS"; then
-    echo "错误 / Error: 不存在 Skill / Skill not found: $name" >&2
+    ui_error "Skill 不存在 / Skill not found: $name"
     exit 1
   fi
   if ! contains_skill "$name" "$SELECTED_SKILLS"; then
@@ -231,7 +292,7 @@ else
       done
       ;;
     *)
-      echo "错误 / Error: 未知集合 / Unknown preset: $REQUESTED_SET" >&2
+      ui_error "未知集合 / Unknown preset: $REQUESTED_SET"
       exit 1
       ;;
   esac
@@ -245,16 +306,28 @@ if contains_skill "aki-grill-with-context" "$SELECTED_SKILLS"; then
   add_selected "aki-context-sync"
 fi
 
-[ -n "$SELECTED_SKILLS" ] || { echo "错误 / Error: 最终 Skill 集合为空 / Final Skill set is empty." >&2; exit 1; }
+[ -n "$SELECTED_SKILLS" ] || { ui_error "最终 Skill 集合为空 / Final Skill set is empty"; exit 1; }
 
-echo "选择的 Skill / Selected Skills: $SELECTED_SKILLS"
-echo
+if [ -n "$REQUESTED_SKILLS" ]; then
+  preset_label="custom"
+else
+  preset_label="$REQUESTED_SET"
+fi
+
+ui_section "安装计划 / Plan"
+ui_kv "preset" "$preset_label"
+ui_kv "destination" "$(display_path "$DEST_DIR")"
+ui_kv "skills" "$(count_skills "$SELECTED_SKILLS")"
+if [ "$VERBOSE" = "1" ]; then
+  ui_kv "source" "$REPO_URL@$REF"
+  printf '    %-12s %s\n' "selected" "$SELECTED_SKILLS"
+fi
 
 ensure_matt_repo() {
   if [ "$MATT_READY" -eq 1 ]; then return; fi
-  echo "读取外部 Skill / Fetching external Skills: mattpocock/skills"
+  ui_info "mattpocock/skills · fetching"
   if ! git clone --quiet --depth 1 --branch "$MATT_REF" "$MATT_REPO" "$MATT_ROOT"; then
-    echo "错误 / Error: 无法读取 mattpocock/skills / Failed to fetch mattpocock/skills." >&2
+    ui_error "无法读取 mattpocock/skills / Failed to fetch mattpocock/skills"
     exit 1
   fi
   MATT_READY=1
@@ -273,15 +346,15 @@ resolve_matt_skill_dir() {
       return
     fi
   done
-  echo "错误 / Error: mattpocock/skills 中找不到 / Skill not found upstream: $target" >&2
+  ui_error "mattpocock/skills 中找不到 / Skill not found upstream: $target"
   exit 1
 }
 
 ensure_gda_repo() {
   if [ "$GDA_READY" -eq 1 ]; then return; fi
-  echo "读取外部 Skill / Fetching external Skill: aigengame/godot-agent"
+  ui_info "aigengame/godot-agent · fetching"
   if ! git clone --quiet --depth 1 --branch "$GDA_REF" "$GDA_REPO" "$GDA_ROOT"; then
-    echo "错误 / Error: 无法读取 aigengame/godot-agent / Failed to fetch aigengame/godot-agent." >&2
+    ui_error "无法读取 aigengame/godot-agent / Failed to fetch aigengame/godot-agent"
     exit 1
   fi
   GDA_READY=1
@@ -300,17 +373,18 @@ install_from_dir() {
   local dest="$DEST_DIR/$name"
   local marker="$dest/.aki-agent-kit-managed"
   local stage="$DEST_DIR/.${name}.tmp.$$"
+  local status
 
   if [ -e "$dest" ] && [ ! -f "$marker" ]; then
-    echo "错误 / Error: 拒绝覆盖非本安装器管理的 Skill / Refusing to overwrite unmanaged Skill: $dest" >&2
+    ui_error "拒绝覆盖非本安装器管理的 Skill / Refusing to overwrite unmanaged Skill: $dest"
     exit 1
   fi
 
   if [ -f "$marker" ]; then
-    echo "更新 / Updating: $name"
+    status="updated"
     updated=$((updated + 1))
   else
-    echo "安装 / Installing: $name"
+    status="installed"
     installed=$((installed + 1))
   fi
 
@@ -327,6 +401,7 @@ install_from_dir() {
 
   rm -rf "$dest"
   mv "$stage" "$dest"
+  ui_ok "$name" "$status"
 }
 
 install_one() {
@@ -358,6 +433,7 @@ install_one() {
   esac
 }
 
+ui_section "同步 Skills / Sync"
 for name in $SELECTED_SKILLS; do
   install_one "$name"
 done
@@ -368,91 +444,21 @@ for dest in "$DEST_DIR"/*; do
   [ -f "$dest/.aki-agent-kit-managed" ] || continue
   name="$(basename "$dest")"
   if ! contains_skill "$name" "$SELECTED_SKILLS"; then
-    echo "清理 / Removing: $name"
     rm -rf "$dest"
     removed=$((removed + 1))
+    ui_ok "$name" "removed"
   fi
 done
 
-echo
-echo "安装完成 / Installation complete"
-echo "新安装 / Installed: $installed"
-echo "已更新 / Updated: $updated"
-echo "已清理 / Removed: $removed"
-echo "安装目录 / Directory: $DEST_DIR"
-echo
-echo "Skill 使用方法 / Skill usage"
+printf '\n%b✓%b %b完成 / Done%b\n' "$GREEN" "$RESET" "$BOLD" "$RESET"
+printf '  %s installed  ·  %s updated  ·  %s removed\n' "$installed" "$updated" "$removed"
+printf '  %s\n' "$(display_path "$DEST_DIR")"
 
-for name in $SELECTED_SKILLS; do
-  echo
-  echo "$name"
-  case "$name" in
-    aki-project-bootstrap)
-      echo '  使用 `aki-project-bootstrap` 初始化当前项目。'
-      echo '  Use `aki-project-bootstrap` to initialize the current project.'
-      ;;
-    aki-context-sync)
-      echo '  使用 `aki-context-sync` 收敛当前会话上下文。'
-      echo '  Use `aki-context-sync` to consolidate the current session context.'
-      ;;
-    aki-project-readme)
-      echo '  使用 `aki-project-readme` 审查并完善当前项目 README。'
-      echo '  Use `aki-project-readme` to review and improve the current project README.'
-      ;;
-    aki-project-audit)
-      echo '  使用 `aki-project-audit` 全面审计当前项目。'
-      echo '  Use `aki-project-audit` to audit the current project.'
-      ;;
-    aki-open-source-audit)
-      echo '  使用 `aki-open-source-audit` 做开源前审计。'
-      echo '  Use `aki-open-source-audit` before making the repository public.'
-      ;;
-    aki-game-playtest-audit)
-      echo '  使用 `aki-game-playtest-audit` 从玩家路径审计当前游戏。'
-      echo '  Use `aki-game-playtest-audit` to audit the game from the player path.'
-      ;;
-    aki-grill-with-context)
-      echo '  使用 `aki-grill-with-context` 深度澄清决策，并把长期结论同步进项目权威文档。'
-      echo '  Use `aki-grill-with-context` to grill decisions and sync durable conclusions into project docs.'
-      ;;
-    grill-me)
-      echo '  使用 `grill-me` 深度追问一个计划、设计或想法。'
-      echo '  Use `grill-me` to relentlessly sharpen a plan, design, or idea.'
-      ;;
-    grilling)
-      echo '  `grilling` 是 grill-me 与 aki-grill-with-context 使用的底层决策树 Skill。'
-      echo '  `grilling` is the decision-tree primitive used by grill-me and aki-grill-with-context.'
-      ;;
-    handoff)
-      echo '  使用 `handoff` 把当前会话压缩成下一位 Agent 可接管的临时交接文档。'
-      echo '  Use `handoff` to compact the current conversation for the next agent.'
-      ;;
-    retro)
-      echo '  使用 `retro` 复盘一次编码会话，找出 Agent 环境、规则和工具链的改进点。'
-      echo '  Use `retro` to improve the agent environment after a coding session.'
-      ;;
-    writing-for-agents)
-      echo '  `writing-for-agents` 是 retro 等上游 Skill 使用的 Agent 文档写作参考。'
-      echo '  `writing-for-agents` is a reference used by upstream Skills such as retro.'
-      ;;
-    gda)
-      echo '  使用 `gda` 驱动 Godot、运行场景、模拟输入、截图、读取日志和性能数据。'
-      echo '  Use `gda` to drive Godot, run scenes, simulate input, capture frames, and inspect diagnostics.'
-      if ! command -v gda >/dev/null 2>&1; then
-        echo '  当前未检测到 gda CLI；Skill 已安装，但真正操作 Godot 前还需：`uv tool install gda`。'
-        echo '  gda CLI was not found; install it before driving Godot: `uv tool install gda`.'
-      fi
-      ;;
-    aki-rednote-cover)
-      echo '  使用 `aki-rednote-cover` 为当前内容生成封面。'
-      echo '  Use `aki-rednote-cover` to generate covers for the current content.'
-      ;;
-  esac
-done
+if contains_skill "gda" "$SELECTED_SKILLS" && ! command -v gda >/dev/null 2>&1; then
+  ui_section "需要处理 / Action required"
+  ui_warn 'gda Skill 已安装，但未检测到 gda CLI：`uv tool install gda`'
+fi
 
-echo
-echo "提示 / Tip: 如果当前 Agent 会话没有发现新安装的 Skill，请新建会话或重启 Agent。"
-echo "Tip: If the current Agent session does not discover the newly installed Skills, start a new session or restart the Agent."
-echo
-echo "更新 / Update: 以后重复运行安装器并使用相同参数，即可更新并收敛本仓库与外部受管 Skill。"
-echo "Update: Rerun the installer with the same parameters to update local and external managed Skills."
+ui_section "下一步 / Next"
+printf '  新会话即可使用这些 Skills；未发现时重启 Agent。\n'
+printf '  %b再次运行同一命令即可更新并收敛受管 Skills。%b\n' "$DIM" "$RESET"
