@@ -16,7 +16,7 @@
 - `scripts/`：仓库级确定性工具，目前包含用户级 Skill 安装器及外部 Skill 编排。
 - `assets/`：仓库级静态资源。
 
-具体项目的目录树属于项目事实，不在本仓库维护固定模板。通用的“目录规范如何形成和落盘”由 `principles/project-development.md` 与 `principles/game-development.md` 规定；项目自己的稳定目录约束由项目 `AGENTS.md`、架构/GDD 文档或 `docs/project-structure.md` 承载。
+具体项目的目录树属于项目事实，不在本仓库维护固定模板。通用的“目录规范如何形成和落盘”由 `principles/project-development.md` 与 `principles/game-development.md` 规定；项目自己的稳定目录约束由项目 `AGENTS.md`、架构/GDD 文档或 `docs/project-structure.md` 承载。游戏项目的 GDD、Roadmap、Idea Backlog、技术设计、美术方向与决策记录等文档职责也由 `principles/game-development.md` 统一定义，不在多个 Skill 中重复维护一套模板。
 
 ## Skill Installation
 
@@ -66,7 +66,7 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 ## Principles
 
 - 普通项目开发基线：`principles/project-development.md`
-- 游戏开发补充：`principles/game-development.md`
+- 游戏开发补充（含项目目录与文档职责）：`principles/game-development.md`
 - Git：`principles/git.md`
 - 通用精简审计：`principles/simplification.md`
 - 游戏精简补充：`principles/game-simplification.md`
