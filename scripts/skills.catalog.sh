@@ -6,6 +6,21 @@
 
 EXTERNAL_SKILLS="grill-me grilling handoff retro writing-for-agents gda"
 
+catalog_provider_repo() {
+  case "$1" in
+    matt) echo "https://github.com/mattpocock/skills.git" ;;
+    gda) echo "https://github.com/aigengame/godot-agent.git" ;;
+    *) return 1 ;;
+  esac
+}
+
+catalog_provider_ref() {
+  case "$1" in
+    matt|gda) echo "main" ;;
+    *) return 1 ;;
+  esac
+}
+
 catalog_skill_summary() {
   case "$1" in
     aki-project-bootstrap) echo "项目接入与 AGENTS.md 初始化" ;;
