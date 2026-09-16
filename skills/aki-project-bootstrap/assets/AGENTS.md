@@ -11,9 +11,9 @@ Project profile: `{{PROJECT_PROFILE}}`
    https://github.com/gongfpp/aki-agent-kit/blob/main/principles/project-development.md?raw=1
 2. 如果 profile 为 `game`，额外读取：
    https://github.com/gongfpp/aki-agent-kit/blob/main/principles/game-development.md?raw=1
-3. 在 Git 仓库内，当前会话第一次执行会写入项目文件的任务前读取 Git 原则：
+3. 一旦判断当前任务将创建、修改或删除项目文件，即形成 write intent。在 Git 仓库内，如果当前会话尚未加载 Git 原则，必须在做出具体修改承诺、制定实施性文件/分支计划或执行任何写入之前先读取：
    https://github.com/gongfpp/aki-agent-kit/blob/main/principles/git.md?raw=1
-   任务完成并验证后按该原则完成本地版本管理收尾。是否 push、创建 PR 或执行其他远端操作，由当前项目指令、仓库既有流程和当次任务决定。
+   不要先答应修改、开始实施规划或动文件后再补读。任务完成并验证后按该原则完成本地版本管理收尾。是否 push、创建 PR 或执行其他远端操作，由当前项目指令、仓库既有流程和当次任务决定。
 4. 只有在精简、清理、架构收敛或删除无用复杂度的任务中读取：
    https://github.com/gongfpp/aki-agent-kit/blob/main/principles/simplification.md?raw=1
    如果 profile 为 `game`，同时读取：
