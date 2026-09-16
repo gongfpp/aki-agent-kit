@@ -6,10 +6,6 @@ REF="${AKI_AGENT_KIT_REF:-main}"
 DEST_DIR="${AKI_SKILLS_DIR:-$HOME/.agents/skills}"
 REQUESTED_SET="${AKI_SKILL_SET:-}"
 REQUESTED_SKILLS="${AKI_SKILLS:-}"
-MATT_REPO="${AKI_MATT_SKILLS_REPO:-https://github.com/mattpocock/skills.git}"
-MATT_REF="${AKI_MATT_SKILLS_REF:-main}"
-GDA_REPO="${AKI_GDA_REPO:-https://github.com/aigengame/godot-agent.git}"
-GDA_REF="${AKI_GDA_REF:-main}"
 LIST_ONLY=0
 VERBOSE="${AKI_INSTALL_VERBOSE:-0}"
 
@@ -84,14 +80,10 @@ usage() {
 aki-agent-kit Skill Installer
 
 Usage:
-  install.sh                       project preset (default)
-  install.sh --set core            minimal project baseline
-  install.sh --set project         default software project set
-  install.sh --set game            project + game playtest + gda
-  install.sh --set opensource      project + open-source audit
-  install.sh --set all             all managed Skills
-  install.sh --skills a,b,c        exact Skills; dependencies auto-added
-  install.sh --list                list presets and Skills
+  install.sh                       install the default project preset
+  install.sh --set NAME            install a named preset; use --list to inspect current presets
+  install.sh --skills a,b,c        install exact Skills; dependencies auto-added
+  install.sh --list                list current presets and Skills
   install.sh -v, --verbose         show source and selected Skill details
   install.sh -h, --help            show help
 
@@ -163,6 +155,19 @@ if ! git clone --quiet --depth 1 --branch "$REF" "$REPO_URL" "$tmp_dir/repo"; th
   exit 1
 fi
 
+CATALOG_FILE="$tmp_dir/repo/scripts/skills.catalog.sh"
+if [ ! -f "$CATALOG_FILE" ]; then
+  ui_error "缺少 Skill catalog / Missing scripts/skills.catalog.sh"
+  exit 1
+fi
+# shellcheck disable=SC1090
+. "$CATALOG_FILE"
+
+MATT_REPO="${AKI_MATT_SKILLS_REPO:-$(catalog_provider_repo matt)}"
+MATT_REF="${AKI_MATT_SKILLS_REF:-$(catalog_provider_ref matt)}"
+GDA_REPO="${AKI_GDA_REPO:-$(catalog_provider_repo gda)}"
+GDA_REF="${AKI_GDA_REF:-$(catalog_provider_ref gda)}"
+
 # Plain whitespace-separated lists keep compatibility with macOS system Bash 3.2 + set -u.
 LOCAL_SKILLS=""
 for src in "$tmp_dir"/repo/skills/*; do
@@ -176,7 +181,6 @@ for src in "$tmp_dir"/repo/skills/*; do
   fi
 done
 
-EXTERNAL_SKILLS="grill-me grilling handoff retro writing-for-agents gda"
 AVAILABLE_SKILLS="$LOCAL_SKILLS $EXTERNAL_SKILLS"
 SELECTED_SKILLS=""
 MATT_READY=0
@@ -194,40 +198,19 @@ contains_skill() {
   esac
 }
 
-skill_summary() {
-  case "$1" in
-    aki-project-bootstrap) echo "项目接入与 AGENTS.md 初始化" ;;
-    aki-context-sync) echo "会话上下文持久化与文档收敛" ;;
-    aki-project-readme) echo "项目 README 生成、审查与维护" ;;
-    aki-project-audit) echo "项目全面审计" ;;
-    aki-open-source-audit) echo "开源前安全与合规审计" ;;
-    aki-game-playtest-audit) echo "游戏玩家路径与试玩审计" ;;
-    aki-grill-with-context) echo "Grilling + context sync 决策收敛" ;;
-    aki-rednote-cover) echo "小红书封面生成（个人专用）" ;;
-    grill-me) echo "深度追问计划与设计 · Matt Pocock" ;;
-    grilling) echo "grill-me 决策树执行核心 · Matt Pocock" ;;
-    handoff) echo "会话交接文档 · Matt Pocock" ;;
-    retro) echo "编码会话复盘 · Matt Pocock" ;;
-    writing-for-agents) echo "Agent 文档写作参考 · Matt Pocock" ;;
-    gda) echo "Godot 自动化 · aigengame" ;;
-    *) echo "Skill" ;;
-  esac
-}
-
 print_presets() {
+  local preset
   ui_section "预设 / Presets"
-  printf '  %-12s %s\n' "core" "bootstrap + context-sync"
-  printf '  %-12s %s\n' "project" "core + README/audit + grill/handoff/retro  (default)"
-  printf '  %-12s %s\n' "game" "project + playtest-audit + gda"
-  printf '  %-12s %s\n' "opensource" "project + open-source-audit"
-  printf '  %-12s %s\n' "all" "all local + external Skills"
+  for preset in $(catalog_presets); do
+    printf '  %-12s %s%s\n' "$preset" "$(catalog_preset_summary "$preset")" "$( [ "$preset" = "project" ] && printf '  (default)' || true )"
+  done
 }
 
 print_available() {
-  ui_section "Skills"
   local name
+  ui_section "Skills"
   for name in $AVAILABLE_SKILLS; do
-    printf '  %-30s %s\n' "$name" "$(skill_summary "$name")"
+    printf '  %-30s %s\n' "$name" "$(catalog_skill_summary "$name")"
   done
 }
 
@@ -252,59 +235,37 @@ add_selected() {
   fi
 }
 
-add_project_set() {
-  add_selected "aki-project-bootstrap"
-  add_selected "aki-context-sync"
-  add_selected "aki-project-readme"
-  add_selected "aki-project-audit"
-  add_selected "aki-grill-with-context"
-  add_selected "grill-me"
-  add_selected "handoff"
-  add_selected "retro"
-}
-
 if [ -n "$REQUESTED_SKILLS" ]; then
   normalized="$(printf '%s' "$REQUESTED_SKILLS" | tr ',' ' ')"
   for name in $normalized; do
     add_selected "$name"
   done
 else
-  case "$REQUESTED_SET" in
-    core)
-      add_selected "aki-project-bootstrap"
-      add_selected "aki-context-sync"
-      ;;
-    project)
-      add_project_set
-      ;;
-    game)
-      add_project_set
-      add_selected "aki-game-playtest-audit"
-      add_selected "gda"
-      ;;
-    opensource)
-      add_project_set
-      add_selected "aki-open-source-audit"
-      ;;
-    all)
-      for name in $AVAILABLE_SKILLS; do
-        add_selected "$name"
-      done
-      ;;
-    *)
-      ui_error "未知集合 / Unknown preset: $REQUESTED_SET"
-      exit 1
-      ;;
-  esac
+  if ! preset_skills="$(catalog_preset_skills "$REQUESTED_SET")"; then
+    ui_error "未知集合 / Unknown preset: $REQUESTED_SET"
+    exit 1
+  fi
+  if [ "$preset_skills" = "__ALL__" ]; then
+    for name in $AVAILABLE_SKILLS; do
+      add_selected "$name"
+    done
+  else
+    for name in $preset_skills; do
+      add_selected "$name"
+    done
+  fi
 fi
 
-# Resolve Skill-to-Skill dependencies without duplicating upstream implementations.
-if contains_skill "grill-me" "$SELECTED_SKILLS"; then add_selected "grilling"; fi
-if contains_skill "retro" "$SELECTED_SKILLS"; then add_selected "writing-for-agents"; fi
-if contains_skill "aki-grill-with-context" "$SELECTED_SKILLS"; then
-  add_selected "grilling"
-  add_selected "aki-context-sync"
-fi
+# Resolve dependencies to a fixed point so catalog entries can depend on other managed Skills.
+while :; do
+  before="$SELECTED_SKILLS"
+  for name in $SELECTED_SKILLS; do
+    for dependency in $(catalog_skill_dependencies "$name"); do
+      add_selected "$dependency"
+    done
+  done
+  [ "$before" = "$SELECTED_SKILLS" ] && break
+done
 
 [ -n "$SELECTED_SKILLS" ] || { ui_error "最终 Skill 集合为空 / Final Skill set is empty"; exit 1; }
 
@@ -375,6 +336,11 @@ install_from_dir() {
   local stage="$DEST_DIR/.${name}.tmp.$$"
   local status
 
+  if [ ! -d "$src" ] || [ ! -f "$src/SKILL.md" ]; then
+    ui_error "Skill 源无效 / Invalid Skill source: $name"
+    exit 1
+  fi
+
   if [ -e "$dest" ] && [ ! -f "$marker" ]; then
     ui_error "拒绝覆盖非本安装器管理的 Skill / Refusing to overwrite unmanaged Skill: $dest"
     exit 1
@@ -406,9 +372,11 @@ install_from_dir() {
 
 install_one() {
   local name="$1"
-  local generated
-  case "$name" in
-    grill-me|grilling|handoff|retro|writing-for-agents)
+  local provider generated
+  provider="$(catalog_skill_provider "$name")"
+
+  case "$provider" in
+    matt)
       resolve_matt_skill_dir "$name"
       install_from_dir "$name" "$RESOLVED_SKILL_DIR" "$MATT_REPO" "$MATT_REF" "$MATT_ROOT/LICENSE"
       ;;
@@ -427,8 +395,12 @@ install_one() {
         install_from_dir "$name" "$GDA_ROOT/src/gda/skill" "$GDA_REPO" "$GDA_REF" "$GDA_ROOT/LICENSE"
       fi
       ;;
-    *)
+    local)
       install_from_dir "$name" "$tmp_dir/repo/skills/$name" "$REPO_URL" "$REF" ""
+      ;;
+    *)
+      ui_error "未知 Skill provider / Unknown provider for $name: $provider"
+      exit 1
       ;;
   esac
 }
