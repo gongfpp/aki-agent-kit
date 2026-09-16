@@ -17,6 +17,17 @@
 - 任务完成后检查改动与基本可用性，再按仓库现有流程决定是否 push、创建 PR、合并到 `main` 或继续保留本地分支。
 - 合并完成后按仓库既有流程清理已完成分支。
 
+## 仓库卫生与本地工具状态
+
+- commit 前检查新增的未跟踪文件和隐藏目录，尤其关注 IDE、AI Agent、构建工具、测试工具和操作系统自动产生的内容；不要因为文件名以 `.` 开头就默认提交或默认忽略。
+- 先区分“项目需要共享的确定性配置/规则”和“当前用户、当前 Agent、当前机器的本地状态”。项目级命令、规则、Skill、MCP 配置等如果未来协作者或 Agent 需要共同使用，可以进入版本库；本地 session、聊天记录、缓存、索引、日志、临时上下文、绝对路径和设备相关状态默认不进入版本库。
+- `.codex/`、`.opencode/`、`.cursor/`、`.claude/`、`.workbuddy/`、`.zcode/`、`.vscode/`、`.idea/` 等工具目录只作为常见示例，不机械整目录忽略；目录中同时存在共享配置和本地状态时使用细粒度规则，只排除真正的本地内容。
+- credential、token、cookie、secret、私钥、本地环境文件和其他敏感信息不得进入仓库；`.gitignore` 不是秘密管理方案，已经进入 Git 历史的敏感信息必须按泄露处理。
+- cache、index、日志、测试报告、临时截图、调试输出和可重新生成的构建/导入中间产物通常不提交；常见示例包括 `.DS_Store`、`Thumbs.db`、`node_modules/`、`__pycache__/`、`.venv/`、`coverage/`、`playwright-report/`，以及 Godot `.godot/`、Unity `Library/` / `Temp/` / `Logs/`、Unreal `DerivedDataCache/` / `Intermediate/` / `Saved/` 等。具体仍服从项目和工具真实要求。
+- 不因为文件“自动生成”就默认忽略；lockfile、引擎要求的项目元数据、必要生成源码和发布所需文件是否入库，以项目契约、构建可复现性和工具官方要求为准。
+- 所有项目参与者都不应提交的内容进入仓库 `.gitignore`；只属于当前开发者、当前机器或当前 Agent 的个人忽略项，优先使用 `.git/info/exclude` 或用户级 global gitignore，避免污染共享规则。
+- 新增或修改 `.gitignore` 时避免过宽模式吞掉有效项目文件；已经被 Git 跟踪的文件不会因新增 ignore 自动退出版本管理，需要单独确认真实意图后处理。
+
 ## 安全边界
 
 - 未经明确确认，不执行可能破坏历史或丢失代码的 Git 操作，如 `reset --hard`、`push --force`、rebase 后强制覆盖远端。

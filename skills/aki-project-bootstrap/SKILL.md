@@ -28,7 +28,7 @@ description: 幂等地为新项目或已有项目建立最小 AGENTS.md 接入�
 
 - `project` 在每个新会话读取一次项目开发原则；
 - `game` 在此基础上读取一次游戏开发补充；
-- Git 原则延迟到当前会话第一次 Git write task 前读取；本 Skill 自己创建或更新 `AGENTS.md` 也属于 Git write task；
+- 一旦识别出任务将创建、修改或删除项目文件，即形成 write intent；如果当前位于 Git 仓库且本会话尚未加载 Git 原则，应在做出具体修改承诺、实施性规划或任何文件写入之前立即读取；本 Skill 自己创建或更新 `AGENTS.md` 也属于 Git write task；
 - 只有精简、清理、架构收敛或删除无用复杂度的任务才读取精简审计；游戏项目同时读取游戏精简补充；
 - 同一远程原则在当前会话已经成功读取后直接继续遵循，不因后续轮次或重复任务再次请求；只有用户要求刷新、远程入口发生变化或明确需要重新核实时才重新读取。
 
@@ -53,7 +53,7 @@ region 外已有内容属于项目本身，不重写、重新排序或格式化�
 ## 工作流
 
 1. 读取现有 `AGENTS.md`、仓库结构和与项目指令直接相关的文档。
-2. 如果当前目录位于 Git 仓库，并且当前会话尚未加载 Git 原则，读取 `principles/git.md`；检查当前分支和工作区状态，并把本次 bootstrap 视为 Git write task。
+2. bootstrap 本身会写入项目文件，因此进入 Git 仓库后立即视为已经形成 write intent；如果当前会话尚未加载 Git 原则，先读取 `principles/git.md` 并检查当前分支和工作区状态，再继续判断 profile、规划修改或写入 `AGENTS.md`。
 3. 判断 `project` 或 `game` profile。
 4. 读取模板并验证当前 profile 需要的 principle URL。
 5. 检查 managed region：不存在则插入一份；存在且配对正确则只更新 region 内部。
@@ -71,4 +71,4 @@ region 外已有内容属于项目本身，不重写、重新排序或格式化�
 
 ## 验收
 
-完成后必须满足：只有一个合法 managed region；原有项目内容完整保留；region 由 profile 和模板唯一决定；相同状态再次执行 Git diff 为空。位于 Git 仓库时，本次 bootstrap 的改动已经按 Git 原则完成本地版本管理；远端操作如有执行则遵循项目与仓库既有流程。
+完成后必须满足：只有一个合法 managed region；原有项目内容完整保留；region 由 profile 和模板唯一决定；相同状态再次执行 Git diff 为空。位于 Git 仓库时，本次 bootstrap 的 Git 原则在任何实施性规划或写入发生前已经完成加载，本次改动也已按 Git 原则完成本地版本管理；远端操作如有执行则遵循项目与仓库既有流程。
