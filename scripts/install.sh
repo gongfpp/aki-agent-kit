@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-REPO_URL="${AKI_AGENT_KIT_REPO:-https://github.com/gongfpp/aki-agent-kit.git}"
+DEFAULT_REPO_URL="https://github.com/gongfpp/aki-agent-kit.git"
+REPO_URL="${AKI_AGENT_KIT_REPO:-$DEFAULT_REPO_URL}"
 REF="${AKI_AGENT_KIT_REF:-main}"
 DEST_DIR="${AKI_SKILLS_DIR:-$HOME/.agents/skills}"
 REQUESTED_SET="${AKI_SKILL_SET:-}"
@@ -76,6 +77,36 @@ count_skills() {
   printf '%s' "$count"
 }
 
+curl_download() {
+  local url="$1"
+  local output="$2"
+  local candidate
+
+  command -v curl >/dev/null 2>&1 || return 1
+  rm -f "$output"
+
+  if [ -n "$PROXY" ]; then
+    curl -fsSL --connect-timeout 4 --max-time 25 --proxy "$PROXY" "$url" -o "$output"
+    return
+  fi
+
+  if curl -fsSL --connect-timeout 4 --max-time 15 "$url" -o "$output"; then
+    return 0
+  fi
+
+  rm -f "$output"
+  for candidate in http://127.0.0.1:7897 http://127.0.0.1:7890; do
+    ui_info "直连失败，尝试本地 Clash / Direct failed, trying $candidate"
+    if curl -fsSL --connect-timeout 2 --max-time 25 --proxy "$candidate" "$url" -o "$output"; then
+      PROXY="$candidate"
+      return 0
+    fi
+    rm -f "$output"
+  done
+
+  return 1
+}
+
 git_clone_repo() {
   local ref="$1"
   local repo="$2"
@@ -91,6 +122,29 @@ git_clone_repo() {
   else
     git clone --quiet --depth 1 --branch "$ref" "$repo" "$dest"
   fi
+}
+
+load_aki_repo() {
+  local dest="$1"
+  local archive="$tmp_dir/aki-agent-kit.tar.gz"
+  local archive_url="https://api.github.com/repos/gongfpp/aki-agent-kit/tarball/$REF"
+
+  if [ "$REPO_URL" = "$DEFAULT_REPO_URL" ] \
+    && command -v curl >/dev/null 2>&1 \
+    && command -v tar >/dev/null 2>&1; then
+    if curl_download "$archive_url" "$archive"; then
+      mkdir -p "$dest"
+      if tar -xzf "$archive" -C "$dest" --strip-components=1; then
+        return 0
+      fi
+      rm -rf "$dest"
+      ui_warn "仓库归档解压失败，回退 Git clone / Archive extraction failed; falling back to Git clone"
+    else
+      ui_warn "仓库归档下载失败，回退 Git clone / Archive download failed; falling back to Git clone"
+    fi
+  fi
+
+  git_clone_repo "$REF" "$REPO_URL" "$dest"
 }
 
 git_remote_revision() {
@@ -156,7 +210,7 @@ Environment:
   AKI_SKILLS           same as --skills
   AKI_AGENT_KIT_REPO   source repository
   AKI_AGENT_KIT_REF    source Git ref, default main
-  AKI_PROXY            command-scoped HTTP/mixed proxy for installer Git fetches
+  AKI_PROXY            command-scoped HTTP/mixed proxy for installer network access
   AKI_INSTALL_VERBOSE  set to 1 for verbose output
   NO_COLOR             disable ANSI colors
 TXT
@@ -214,7 +268,7 @@ trap 'rm -rf "$tmp_dir"' EXIT
 
 ui_title
 ui_info "读取 Skill catalog / Loading catalog"
-if ! git_clone_repo "$REF" "$REPO_URL" "$tmp_dir/repo"; then
+if ! load_aki_repo "$tmp_dir/repo"; then
   ui_error "无法读取 aki-agent-kit / Failed to fetch aki-agent-kit"
   if [ -z "$PROXY" ]; then
     ui_warn '网络受限时可设置 AKI_PROXY=http://127.0.0.1:<Clash mixed-port> 后重试'
