@@ -93,6 +93,51 @@ git_clone_repo() {
   fi
 }
 
+git_remote_revision() {
+  local ref="$1"
+  local repo="$2"
+  local output revision
+
+  if [ -n "$PROXY" ]; then
+    output="$(env \
+      http_proxy="$PROXY" \
+      https_proxy="$PROXY" \
+      HTTP_PROXY="$PROXY" \
+      HTTPS_PROXY="$PROXY" \
+      git ls-remote "$repo" "$ref" 2>/dev/null)" || return 1
+  else
+    output="$(git ls-remote "$repo" "$ref" 2>/dev/null)" || return 1
+  fi
+
+  revision="$(printf '%s\n' "$output" | awk 'NF >= 2 { value=$1 } END { print value }')"
+  [ -n "$revision" ] || return 1
+  printf '%s' "$revision"
+}
+
+provider_state_matches() {
+  local state_file="$1"
+  local source="$2"
+  local ref="$3"
+  local revision="$4"
+
+  [ -f "$state_file" ] || return 1
+  grep -Fqx "source=$source" "$state_file" || return 1
+  grep -Fqx "ref=$ref" "$state_file" || return 1
+  grep -Fqx "revision=$revision" "$state_file" || return 1
+}
+
+write_provider_state() {
+  local state_file="$1"
+  local source="$2"
+  local ref="$3"
+  local revision="$4"
+
+  printf '%s\n' \
+    "source=$source" \
+    "ref=$ref" \
+    "revision=$revision" > "$state_file"
+}
+
 usage() {
   cat <<'TXT'
 aki-agent-kit Skill Installer
@@ -206,6 +251,10 @@ done
 AVAILABLE_SKILLS="$LOCAL_SKILLS $EXTERNAL_SKILLS"
 SELECTED_SKILLS=""
 MATT_READY=0
+MATT_SELECTED=0
+MATT_SKIP_FETCH=0
+MATT_REVISION=""
+MATT_STATE_FILE="$DEST_DIR/.aki-agent-kit-provider-matt"
 GDA_READY=0
 MATT_ROOT="$tmp_dir/matt-skills"
 GDA_ROOT="$tmp_dir/godot-agent"
@@ -306,6 +355,41 @@ if [ "$VERBOSE" = "1" ]; then
   printf '    %-12s %s\n' "selected" "$SELECTED_SKILLS"
 fi
 
+selected_matt_skills_are_managed() {
+  local name marker
+
+  for name in $SELECTED_SKILLS; do
+    [ "$(catalog_skill_provider "$name")" = "matt" ] || continue
+    marker="$DEST_DIR/$name/.aki-agent-kit-managed"
+    [ -f "$marker" ] || return 1
+    grep -Fqx "source=$MATT_REPO" "$marker" || return 1
+    grep -Fqx "ref=$MATT_REF" "$marker" || return 1
+  done
+}
+
+prepare_matt_provider() {
+  local name
+
+  for name in $SELECTED_SKILLS; do
+    if [ "$(catalog_skill_provider "$name")" = "matt" ]; then
+      MATT_SELECTED=1
+      break
+    fi
+  done
+
+  [ "$MATT_SELECTED" -eq 1 ] || return
+
+  ui_info "mattpocock/skills · checking"
+  if MATT_REVISION="$(git_remote_revision "$MATT_REF" "$MATT_REPO")"; then
+    if provider_state_matches "$MATT_STATE_FILE" "$MATT_REPO" "$MATT_REF" "$MATT_REVISION" \
+      && selected_matt_skills_are_managed; then
+      MATT_SKIP_FETCH=1
+    fi
+  else
+    ui_warn "mattpocock/skills · revision check failed; falling back to fetch"
+  fi
+}
+
 ensure_matt_repo() {
   if [ "$MATT_READY" -eq 1 ]; then return; fi
   ui_info "mattpocock/skills · fetching"
@@ -314,6 +398,9 @@ ensure_matt_repo() {
     exit 1
   fi
   MATT_READY=1
+  if [ -z "$MATT_REVISION" ]; then
+    MATT_REVISION="$(git -C "$MATT_ROOT" rev-parse HEAD 2>/dev/null || true)"
+  fi
 }
 
 resolve_matt_skill_dir() {
@@ -407,8 +494,13 @@ install_one() {
 
   case "$provider" in
     matt)
-      resolve_matt_skill_dir "$name"
-      install_from_dir "$name" "$RESOLVED_SKILL_DIR" "$MATT_REPO" "$MATT_REF" "$MATT_ROOT/LICENSE"
+      if [ "$MATT_SKIP_FETCH" -eq 1 ]; then
+        unchanged=$((unchanged + 1))
+        ui_ok "$name" "unchanged"
+      else
+        resolve_matt_skill_dir "$name"
+        install_from_dir "$name" "$RESOLVED_SKILL_DIR" "$MATT_REPO" "$MATT_REF" "$MATT_ROOT/LICENSE"
+      fi
       ;;
     gda)
       ensure_gda_repo
@@ -435,10 +527,16 @@ install_one() {
   esac
 }
 
+prepare_matt_provider
+
 ui_section "同步 Skills / Sync"
 for name in $SELECTED_SKILLS; do
   install_one "$name"
 done
+
+if [ "$MATT_SELECTED" -eq 1 ] && [ -n "$MATT_REVISION" ]; then
+  write_provider_state "$MATT_STATE_FILE" "$MATT_REPO" "$MATT_REF" "$MATT_REVISION"
+fi
 
 # Converge every directory previously managed by this installer, including external Skills.
 for dest in "$DEST_DIR"/*; do
