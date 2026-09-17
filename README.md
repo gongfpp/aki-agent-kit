@@ -48,6 +48,23 @@
 curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh | bash
 ```
 
+### 中国大陆网络 / Clash
+
+如果 `raw.githubusercontent.com` 或后续 GitHub clone 在当前网络下容易卡住，可以只让本次安装使用本地 Clash，不修改终端全局代理或 Git 全局配置。下面以 `7897` 为示例端口，按自己的 Clash mixed-port 修改：
+
+```bash
+(
+  AKI_PROXY=http://127.0.0.1:7897
+  tmp="$(mktemp)"
+  trap 'rm -f "$tmp"' EXIT
+  curl -fsSL --proxy "$AKI_PROXY" \
+    https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
+    -o "$tmp" && AKI_PROXY="$AKI_PROXY" bash "$tmp"
+)
+```
+
+`AKI_PROXY` 只传给本次安装器。安装器拉取 `aki-agent-kit`、Matt Skills 和 `gda` 上游时会把代理仅作用于对应 `git clone` 命令，不写入持久化代理配置。
+
 当前提供的 preset 面向不同场景：
 
 - `core`：最小项目基础能力；
@@ -78,7 +95,7 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
   | bash -s -- --skills grill-me,handoff,aki-context-sync
 ```
 
-安装器把最终选择视为受管状态：重复执行会更新已选 Skill，并清理此前由本安装器管理、但本次未选择的 Skill。已有同名但并非本安装器管理的目录不会被覆盖。
+安装器把最终选择视为受管状态：重复执行会同步已选 Skill；实际内容有变化时显示 `updated`，内容完全一致时显示 `unchanged`，此前由本安装器管理但本次未选择的 Skill 会被清理。已有同名但并非本安装器管理的目录不会被覆盖。
 
 默认安装目录是 `~/.agents/skills`。其他平台如果使用不同目录，通过 `AKI_SKILLS_DIR` 指定。
 
