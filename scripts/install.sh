@@ -6,6 +6,7 @@ REF="${AKI_AGENT_KIT_REF:-main}"
 DEST_DIR="${AKI_SKILLS_DIR:-$HOME/.agents/skills}"
 REQUESTED_SET="${AKI_SKILL_SET:-}"
 REQUESTED_SKILLS="${AKI_SKILLS:-}"
+PROXY="${AKI_PROXY:-}"
 LIST_ONLY=0
 VERBOSE="${AKI_INSTALL_VERBOSE:-0}"
 
@@ -75,6 +76,23 @@ count_skills() {
   printf '%s' "$count"
 }
 
+git_clone_repo() {
+  local ref="$1"
+  local repo="$2"
+  local dest="$3"
+
+  if [ -n "$PROXY" ]; then
+    env \
+      http_proxy="$PROXY" \
+      https_proxy="$PROXY" \
+      HTTP_PROXY="$PROXY" \
+      HTTPS_PROXY="$PROXY" \
+      git clone --quiet --depth 1 --branch "$ref" "$repo" "$dest"
+  else
+    git clone --quiet --depth 1 --branch "$ref" "$repo" "$dest"
+  fi
+}
+
 usage() {
   cat <<'TXT'
 aki-agent-kit Skill Installer
@@ -93,6 +111,7 @@ Environment:
   AKI_SKILLS           same as --skills
   AKI_AGENT_KIT_REPO   source repository
   AKI_AGENT_KIT_REF    source Git ref, default main
+  AKI_PROXY            command-scoped HTTP/mixed proxy for installer Git fetches
   AKI_INSTALL_VERBOSE  set to 1 for verbose output
   NO_COLOR             disable ANSI colors
 TXT
@@ -150,8 +169,11 @@ trap 'rm -rf "$tmp_dir"' EXIT
 
 ui_title
 ui_info "读取 Skill catalog / Loading catalog"
-if ! git clone --quiet --depth 1 --branch "$REF" "$REPO_URL" "$tmp_dir/repo"; then
+if ! git_clone_repo "$REF" "$REPO_URL" "$tmp_dir/repo"; then
   ui_error "无法读取 aki-agent-kit / Failed to fetch aki-agent-kit"
+  if [ -z "$PROXY" ]; then
+    ui_warn '网络受限时可设置 AKI_PROXY=http://127.0.0.1:<Clash mixed-port> 后重试'
+  fi
   exit 1
 fi
 
@@ -287,7 +309,7 @@ fi
 ensure_matt_repo() {
   if [ "$MATT_READY" -eq 1 ]; then return; fi
   ui_info "mattpocock/skills · fetching"
-  if ! git clone --quiet --depth 1 --branch "$MATT_REF" "$MATT_REPO" "$MATT_ROOT"; then
+  if ! git_clone_repo "$MATT_REF" "$MATT_REPO" "$MATT_ROOT"; then
     ui_error "无法读取 mattpocock/skills / Failed to fetch mattpocock/skills"
     exit 1
   fi
@@ -314,7 +336,7 @@ resolve_matt_skill_dir() {
 ensure_gda_repo() {
   if [ "$GDA_READY" -eq 1 ]; then return; fi
   ui_info "aigengame/godot-agent · fetching"
-  if ! git clone --quiet --depth 1 --branch "$GDA_REF" "$GDA_REPO" "$GDA_ROOT"; then
+  if ! git_clone_repo "$GDA_REF" "$GDA_REPO" "$GDA_ROOT"; then
     ui_error "无法读取 aigengame/godot-agent / Failed to fetch aigengame/godot-agent"
     exit 1
   fi
@@ -323,6 +345,7 @@ ensure_gda_repo() {
 
 installed=0
 updated=0
+unchanged=0
 removed=0
 
 install_from_dir() {
@@ -346,14 +369,6 @@ install_from_dir() {
     exit 1
   fi
 
-  if [ -f "$marker" ]; then
-    status="updated"
-    updated=$((updated + 1))
-  else
-    status="installed"
-    installed=$((installed + 1))
-  fi
-
   rm -rf "$stage"
   mkdir -p "$stage"
   cp -R "$src"/. "$stage"/
@@ -364,6 +379,21 @@ install_from_dir() {
     "managed-by=aki-agent-kit" \
     "source=$source" \
     "ref=$source_ref" > "$stage/.aki-agent-kit-managed"
+
+  if [ -f "$marker" ] && diff -qr "$dest" "$stage" >/dev/null 2>&1; then
+    unchanged=$((unchanged + 1))
+    rm -rf "$stage"
+    ui_ok "$name" "unchanged"
+    return
+  fi
+
+  if [ -f "$marker" ]; then
+    status="updated"
+    updated=$((updated + 1))
+  else
+    status="installed"
+    installed=$((installed + 1))
+  fi
 
   rm -rf "$dest"
   mv "$stage" "$dest"
@@ -423,7 +453,7 @@ for dest in "$DEST_DIR"/*; do
 done
 
 printf '\n%b✓%b %b完成 / Done%b\n' "$GREEN" "$RESET" "$BOLD" "$RESET"
-printf '  %s installed  ·  %s updated  ·  %s removed\n' "$installed" "$updated" "$removed"
+printf '  %s installed  ·  %s updated  ·  %s unchanged  ·  %s removed\n' "$installed" "$updated" "$unchanged" "$removed"
 printf '  %s\n' "$(display_path "$DEST_DIR")"
 
 if contains_skill "gda" "$SELECTED_SKILLS" && ! command -v gda >/dev/null 2>&1; then
