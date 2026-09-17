@@ -42,28 +42,50 @@
 
 ## 用户级安装
 
-无参数命令安装默认 `project` preset：
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh | bash
-```
-
-### 中国大陆网络 / Clash
-
-如果 `raw.githubusercontent.com` 或后续 GitHub clone 在当前网络下容易卡住，可以只让本次安装使用本地 Clash，不修改终端全局代理或 Git 全局配置。下面以 `7897` 为示例端口，按自己的 Clash mixed-port 修改：
+推荐使用下面的 bootstrap。它不会把 `curl ... | bash` 裸连到底：直连下载 `install.sh` 有明确超时，失败后会依次尝试本机 Clash 常见 mixed-port `7897`、`7890`；代理只传给本次安装，不修改终端或 Git 全局配置。
 
 ```bash
 (
-  AKI_PROXY=http://127.0.0.1:7897
+  set -e
+  url="https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh"
   tmp="$(mktemp)"
+  proxy="${AKI_PROXY:-}"
   trap 'rm -f "$tmp"' EXIT
-  curl -fsSL --proxy "$AKI_PROXY" \
-    https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
-    -o "$tmp" && AKI_PROXY="$AKI_PROXY" bash "$tmp"
+
+  if [ -n "$proxy" ]; then
+    curl -fsSL --connect-timeout 2 --max-time 25 --proxy "$proxy" "$url" -o "$tmp"
+  elif curl -fsSL --connect-timeout 4 --max-time 15 "$url" -o "$tmp"; then
+    :
+  elif curl -fsSL --connect-timeout 2 --max-time 25 --proxy http://127.0.0.1:7897 "$url" -o "$tmp"; then
+    proxy="http://127.0.0.1:7897"
+  elif curl -fsSL --connect-timeout 2 --max-time 25 --proxy http://127.0.0.1:7890 "$url" -o "$tmp"; then
+    proxy="http://127.0.0.1:7890"
+  else
+    echo "Failed to download aki-agent-kit installer" >&2
+    exit 1
+  fi
+
+  if [ -n "$proxy" ]; then
+    AKI_PROXY="$proxy" bash "$tmp"
+  else
+    bash "$tmp"
+  fi
 )
 ```
 
-`AKI_PROXY` 只传给本次安装器。安装器拉取 `aki-agent-kit`、Matt Skills 和 `gda` 上游时会把代理仅作用于对应 `git clone` 命令，不写入持久化代理配置。
+如果已知自己的 Clash mixed-port，也可以预先指定，例如：
+
+```bash
+AKI_PROXY=http://127.0.0.1:7897 bash -c '
+  url="https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh"
+  tmp="$(mktemp)"
+  trap "rm -f \"$tmp\"" EXIT
+  curl -fsSL --connect-timeout 2 --max-time 25 --proxy "$AKI_PROXY" "$url" -o "$tmp"
+  AKI_PROXY="$AKI_PROXY" bash "$tmp"
+'
+```
+
+进入安装器后，读取 aki-agent-kit 自身同样使用有界超时，并在需要时复用本次检测到的本地代理；Matt Skills 和 `gda` 的网络访问也不会写入持久化代理配置。
 
 当前提供的 preset 面向不同场景：
 
@@ -74,25 +96,12 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 - `opensource`：普通项目能力加开源前审计；
 - `all`：全部受管 Skill，包括个人专用项。
 
-preset 的**精确组成以安装器当前 catalog 为准**。查看当前集合、Skill 和说明：
+preset 的**精确组成以安装器当前 catalog 为准**。安装器下载成功后，也可以直接保存为本地文件再传参数，例如：
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
-  | bash -s -- --list
-```
-
-选择 preset：
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
-  | bash -s -- --set godot
-```
-
-精确选择 Skill；必要依赖会自动补齐：
-
-```bash
-curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
-  | bash -s -- --skills grill-me,handoff,aki-context-sync
+bash install.sh --list
+bash install.sh --set godot
+bash install.sh --skills grill-me,handoff,aki-context-sync
 ```
 
 安装器把最终选择视为受管状态：重复执行会同步已选 Skill；实际内容有变化时显示 `updated`，内容完全一致时显示 `unchanged`，此前由本安装器管理但本次未选择的 Skill 会被清理。已有同名但并非本安装器管理的目录不会被覆盖。
