@@ -129,19 +129,23 @@ load_aki_repo() {
   local archive="$tmp_dir/aki-agent-kit.tar.gz"
   local archive_url="https://api.github.com/repos/gongfpp/aki-agent-kit/tarball/$REF"
 
-  if [ "$REPO_URL" = "$DEFAULT_REPO_URL" ] \
-    && command -v curl >/dev/null 2>&1 \
-    && command -v tar >/dev/null 2>&1; then
-    if curl_download "$archive_url" "$archive"; then
-      mkdir -p "$dest"
-      if tar -xzf "$archive" -C "$dest" --strip-components=1; then
-        return 0
-      fi
-      rm -rf "$dest"
-      ui_warn "仓库归档解压失败，回退 Git clone / Archive extraction failed; falling back to Git clone"
-    else
-      ui_warn "仓库归档下载失败，回退 Git clone / Archive download failed; falling back to Git clone"
+  if [ "$REPO_URL" = "$DEFAULT_REPO_URL" ]; then
+    if ! command -v curl >/dev/null 2>&1 || ! command -v tar >/dev/null 2>&1; then
+      ui_error "默认安装需要 curl 和 tar / Default install requires curl and tar"
+      return 1
     fi
+
+    if ! curl_download "$archive_url" "$archive"; then
+      return 1
+    fi
+
+    mkdir -p "$dest"
+    if ! tar -xzf "$archive" -C "$dest" --strip-components=1; then
+      rm -rf "$dest"
+      ui_error "仓库归档解压失败 / Failed to extract aki-agent-kit archive"
+      return 1
+    fi
+    return 0
   fi
 
   git_clone_repo "$REF" "$REPO_URL" "$dest"
