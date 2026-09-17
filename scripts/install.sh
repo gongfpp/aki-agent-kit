@@ -7,7 +7,6 @@ REF="${AKI_AGENT_KIT_REF:-main}"
 DEST_DIR="${AKI_SKILLS_DIR:-$HOME/.agents/skills}"
 REQUESTED_SET="${AKI_SKILL_SET:-}"
 REQUESTED_SKILLS="${AKI_SKILLS:-}"
-PROXY="${AKI_PROXY:-}"
 LIST_ONLY=0
 VERBOSE="${AKI_INSTALL_VERBOSE:-0}"
 
@@ -80,31 +79,10 @@ count_skills() {
 curl_download() {
   local url="$1"
   local output="$2"
-  local candidate
 
   command -v curl >/dev/null 2>&1 || return 1
   rm -f "$output"
-
-  if [ -n "$PROXY" ]; then
-    curl -fsSL --connect-timeout 4 --max-time 25 --proxy "$PROXY" "$url" -o "$output"
-    return
-  fi
-
-  if curl -fsSL --connect-timeout 4 --max-time 15 "$url" -o "$output"; then
-    return 0
-  fi
-
-  rm -f "$output"
-  for candidate in http://127.0.0.1:7897 http://127.0.0.1:7890; do
-    ui_info "直连失败，尝试本地 Clash / Direct failed, trying $candidate"
-    if curl -fsSL --connect-timeout 2 --max-time 25 --proxy "$candidate" "$url" -o "$output"; then
-      PROXY="$candidate"
-      return 0
-    fi
-    rm -f "$output"
-  done
-
-  return 1
+  curl -fsSL --connect-timeout 4 --max-time 15 "$url" -o "$output"
 }
 
 git_clone_repo() {
@@ -112,16 +90,7 @@ git_clone_repo() {
   local repo="$2"
   local dest="$3"
 
-  if [ -n "$PROXY" ]; then
-    env \
-      http_proxy="$PROXY" \
-      https_proxy="$PROXY" \
-      HTTP_PROXY="$PROXY" \
-      HTTPS_PROXY="$PROXY" \
-      git clone --quiet --depth 1 --branch "$ref" "$repo" "$dest"
-  else
-    git clone --quiet --depth 1 --branch "$ref" "$repo" "$dest"
-  fi
+  git clone --quiet --depth 1 --branch "$ref" "$repo" "$dest"
 }
 
 load_aki_repo() {
@@ -156,17 +125,7 @@ git_remote_revision() {
   local repo="$2"
   local output revision
 
-  if [ -n "$PROXY" ]; then
-    output="$(env \
-      http_proxy="$PROXY" \
-      https_proxy="$PROXY" \
-      HTTP_PROXY="$PROXY" \
-      HTTPS_PROXY="$PROXY" \
-      git ls-remote "$repo" "$ref" 2>/dev/null)" || return 1
-  else
-    output="$(git ls-remote "$repo" "$ref" 2>/dev/null)" || return 1
-  fi
-
+  output="$(git ls-remote "$repo" "$ref" 2>/dev/null)" || return 1
   revision="$(printf '%s\n' "$output" | awk 'NF >= 2 { value=$1 } END { print value }')"
   [ -n "$revision" ] || return 1
   printf '%s' "$revision"
@@ -214,7 +173,6 @@ Environment:
   AKI_SKILLS           same as --skills
   AKI_AGENT_KIT_REPO   source repository
   AKI_AGENT_KIT_REF    source Git ref, default main
-  AKI_PROXY            command-scoped HTTP/mixed proxy for installer network access
   AKI_INSTALL_VERBOSE  set to 1 for verbose output
   NO_COLOR             disable ANSI colors
 TXT
@@ -274,9 +232,6 @@ ui_title
 ui_info "读取 Skill catalog / Loading catalog"
 if ! load_aki_repo "$tmp_dir/repo"; then
   ui_error "无法读取 aki-agent-kit / Failed to fetch aki-agent-kit"
-  if [ -z "$PROXY" ]; then
-    ui_warn '网络受限时可设置 AKI_PROXY=http://127.0.0.1:<Clash mixed-port> 后重试'
-  fi
   exit 1
 fi
 
