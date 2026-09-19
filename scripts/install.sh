@@ -7,6 +7,7 @@ REF="${AKI_AGENT_KIT_REF:-main}"
 DEST_DIR="${AKI_SKILLS_DIR:-$HOME/.agents/skills}"
 REQUESTED_SET="${AKI_SKILL_SET:-}"
 REQUESTED_SKILLS="${AKI_SKILLS:-}"
+RULES_DIR="$HOME/.agents/aki-agent-kit/rules"
 LIST_ONLY=0
 VERBOSE="${AKI_INSTALL_VERBOSE:-0}"
 
@@ -118,6 +119,24 @@ load_aki_repo() {
   fi
 
   git_clone_repo "$REF" "$REPO_URL" "$dest"
+}
+
+sync_rules_cache() {
+  local stage="$tmp_dir/rules-cache"
+
+  rm -rf "$stage"
+  mkdir -p "$stage/principles"
+  cp "$tmp_dir/repo/AGENTS.md" "$stage/AGENTS.md"
+  cp "$tmp_dir/repo/principles/"*.md "$stage/principles/"
+
+  mkdir -p "$(dirname "$RULES_DIR")"
+  if [ -d "$RULES_DIR" ] && diff -qr "$RULES_DIR" "$stage" >/dev/null 2>&1; then
+    rm -rf "$stage"
+    return
+  fi
+
+  rm -rf "$RULES_DIR"
+  mv "$stage" "$RULES_DIR"
 }
 
 git_remote_revision() {
@@ -240,6 +259,9 @@ if [ ! -f "$CATALOG_FILE" ]; then
   ui_error "缺少 Skill catalog / Missing scripts/skills.catalog.sh"
   exit 1
 fi
+
+sync_rules_cache
+
 # shellcheck disable=SC1090
 . "$CATALOG_FILE"
 

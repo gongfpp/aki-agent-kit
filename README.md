@@ -10,7 +10,7 @@
 curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh | bash
 ```
 
-默认安装 `project` preset 到 `~/.agents/skills`。
+默认安装 `project` preset 到 `~/.agents/skills`。安装时会把中央规则同步到 `~/.agents/aki-agent-kit/rules/`；后续新会话优先读取本地缓存，只有对应文件不存在时才访问 GitHub。
 
 ## 包含内容
 

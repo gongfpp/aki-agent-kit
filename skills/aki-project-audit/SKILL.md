@@ -21,13 +21,12 @@ description: 对软件或游戏项目进行证据驱动的全面审计，覆盖�
 - Git 当前分支、工作区状态和与问题直接相关的历史；
 - 能实际运行时的最小成功路径与失败路径。
 
-涉及精简、删除复杂度或架构收敛时，同时遵循：
+涉及精简、删除复杂度或架构收敛时，优先读取本地缓存：
 
-https://github.com/gongfpp/aki-agent-kit/blob/main/principles/simplification.md?raw=1
+- `~/.agents/aki-agent-kit/rules/principles/simplification.md`
+- 游戏项目额外读取 `~/.agents/aki-agent-kit/rules/principles/game-simplification.md`
 
-游戏项目额外遵循：
-
-https://github.com/gongfpp/aki-agent-kit/blob/main/principles/game-simplification.md?raw=1
+本地文件存在时直接使用，不为确认最新版本访问远端。只有对应本地文件不存在时，才从 `https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/principles/` 读取同名文件；读取成功后尽量保存回上述本地路径，供后续会话复用。
 
 ## 审计维度
 

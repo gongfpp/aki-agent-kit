@@ -21,7 +21,7 @@
 
 ## Skill Installation
 
-当用户要求安装本仓库管理的 Skills，且没有明确指定其他安装方式时，使用 `scripts/install.sh` 作为 canonical 安装入口。
+当用户要求安装本仓库管理的 Skills，且没有明确指定其他安装方式时，使用 `scripts/install.sh` 作为 canonical 安装入口。安装器同时把根 `AGENTS.md` 和 `principles/` 同步到 `~/.agents/aki-agent-kit/rules/`，作为跨会话复用的本地规则缓存。
 
 如果当前已经位于本仓库 checkout 中，执行：
 
@@ -37,15 +37,17 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 
 用户没有指定集合时使用默认 `project`，不要额外询问。用户指定 preset 时使用 `--set`；明确指定 Skill 时使用 `--skills`，不要自动扩大到其他 preset。
 
-preset 的精确组成、外部 Skill 列表、依赖和 provider 不在本文件重复维护；需要当前事实时运行：
+preset 的精确组成、外部 Skill 列表、依赖和 provider 不在本文件重复维护；需要当前事实时在 checkout 中运行：
 
 ```bash
 bash scripts/install.sh --list
 ```
 
-或在没有 checkout 时使用 README 中的远程 `--list` 命令。机器权威来源是 `scripts/skills.catalog.sh`。
+机器权威来源是 `scripts/skills.catalog.sh`。
 
 外部 Skill 保持原始名称和上游实现，不改名成 `aki-*`；安装时保留来源与许可证。安装执行细节由 `install.sh` 负责，catalog 不实现文件复制或网络流程。
+
+项目和本仓库 Skills 需要中央原则时，优先读取 `~/.agents/aki-agent-kit/rules/principles/` 中的同名文件。本地缓存存在时不为确认最新版本额外访问 GitHub；只有缓存缺失或用户明确要求刷新时才使用远程回退，成功后尽量写回本地缓存。安装器重新运行时会同步刷新缓存。
 
 默认安装到用户级 `~/.agents/skills`。用户或目标平台明确要求其他 Skill 目录时，通过 `AKI_SKILLS_DIR` 指定。安装、更新和受管 Skill 收敛都复用同一脚本；所选最终集合代表受管状态，未被选择的受管 Skill 会被清理。
 
@@ -98,6 +100,7 @@ bash scripts/install.sh --list
 - YAML frontmatter、Markdown、相对路径和远程 URL 有效；
 - README 目录结构与真实仓库一致；
 - 所有引用指向当前存在的 canonical 文件；
+- bootstrap 模板和引用中央原则的 Skills 均遵循“本地缓存优先、缺失才远程回退”，且安装器能同步生成 `~/.agents/aki-agent-kit/rules/`；
 - `scripts/skills.catalog.sh` 是 preset、外部来源和 Skill 依赖的唯一机器权威，`install.sh` 不重复维护这些清单；
 - `install.sh --list` 与 catalog 一致，安装说明不硬编码已经能从 catalog 得到的精确组成；
 - 外部 Skill 的上游来源、依赖和许可证仍有效；
