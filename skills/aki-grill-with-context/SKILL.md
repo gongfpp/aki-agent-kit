@@ -146,4 +146,4 @@ frontier 为空不等于可以立即实施。
 
 ## 来源
 
-访谈机制受 Matt Pocock 的 `grilling` Skill 启发（MIT License）。本实现为独立重写版本，不在安装或运行时访问、安装或依赖 `mattpocock/skills`。
+访谈机制参考 Matt Pocock `skills` 仓库 2026-09-20 的 `main`（`c55ee46073ed923f86ce59a5eb3b6d895095d1b7`）中 `grilling` / `grill-me` 的当前行为（MIT License）。本实现为独立重写版本，不在安装或运行时访问、安装或依赖 `mattpocock/skills`。
