@@ -414,7 +414,6 @@ prepare_matt_provider() {
 
   [ "$MATT_SELECTED" -eq 1 ] || return
 
-  ui_info "mattpocock/skills · checking"
   if MATT_REVISION="$(git_remote_revision "$MATT_REF" "$MATT_REPO")"; then
     if provider_state_matches "$MATT_STATE_FILE" "$MATT_REPO" "$MATT_REF" "$MATT_REVISION" \
       && selected_matt_skills_are_managed; then
