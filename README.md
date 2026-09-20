@@ -30,6 +30,7 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 - `aki-project-audit`：全面审计项目正确性、架构、安全、测试、文档和用户体验。
 - `aki-open-source-audit`：开源前审计敏感信息、历史、许可证和第三方资产。
 - `aki-game-playtest-audit`：从真实玩家路径审计游戏体验。
+- `aki-grill-with-context`：用自包含的决策树式追问澄清计划，并在确认后同步长期结论。
 - `aki-rednote-cover`：个人专用的小红书封面 Skill。
 
 安装器还会在 `godot` preset 中安装 Godot 自动化 Skill `gda`。
@@ -47,6 +48,7 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 
 ```text
 使用 aki-project-bootstrap 初始化当前项目。
+使用 aki-grill-with-context 深度澄清这个设计，并在确认后同步长期结论。
 使用 aki-context-sync 收敛当前会话上下文。
 使用 aki-project-readme 审查并完善当前项目 README。
 使用 aki-project-audit 全面审计当前项目。
