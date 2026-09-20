@@ -4,11 +4,10 @@
 # Keep metadata here; scripts/install.sh owns installation mechanics only.
 # Use plain strings/functions for compatibility with macOS system Bash 3.2.
 
-EXTERNAL_SKILLS="grill-me grilling handoff retro writing-for-agents gda"
+EXTERNAL_SKILLS="gda"
 
 catalog_provider_repo() {
   case "$1" in
-    matt) echo "https://github.com/mattpocock/skills.git" ;;
     gda) echo "https://github.com/aigengame/godot-agent.git" ;;
     *) return 1 ;;
   esac
@@ -16,7 +15,7 @@ catalog_provider_repo() {
 
 catalog_provider_ref() {
   case "$1" in
-    matt|gda) echo "main" ;;
+    gda) echo "main" ;;
     *) return 1 ;;
   esac
 }
@@ -29,13 +28,7 @@ catalog_skill_summary() {
     aki-project-audit) echo "项目全面审计" ;;
     aki-open-source-audit) echo "开源前安全与合规审计" ;;
     aki-game-playtest-audit) echo "游戏玩家路径与试玩审计" ;;
-    aki-grill-with-context) echo "Grilling + context sync 决策收敛" ;;
     aki-rednote-cover) echo "小红书封面生成（个人专用）" ;;
-    grill-me) echo "深度追问计划与设计 · Matt Pocock" ;;
-    grilling) echo "grill-me 决策树执行核心 · Matt Pocock" ;;
-    handoff) echo "会话交接文档 · Matt Pocock" ;;
-    retro) echo "编码会话复盘 · Matt Pocock" ;;
-    writing-for-agents) echo "Agent 文档写作参考 · Matt Pocock" ;;
     gda) echo "Godot 自动化 · aigengame" ;;
     *) echo "Skill" ;;
   esac
@@ -43,7 +36,6 @@ catalog_skill_summary() {
 
 catalog_skill_provider() {
   case "$1" in
-    grill-me|grilling|handoff|retro|writing-for-agents) echo "matt" ;;
     gda) echo "gda" ;;
     *) echo "local" ;;
   esac
@@ -51,9 +43,6 @@ catalog_skill_provider() {
 
 catalog_skill_dependencies() {
   case "$1" in
-    grill-me) echo "grilling" ;;
-    retro) echo "writing-for-agents" ;;
-    aki-grill-with-context) echo "grilling aki-context-sync" ;;
     *) echo "" ;;
   esac
 }
@@ -64,16 +53,16 @@ catalog_preset_skills() {
       echo "aki-project-bootstrap aki-context-sync"
       ;;
     project)
-      echo "aki-project-bootstrap aki-context-sync aki-project-readme aki-project-audit aki-grill-with-context grill-me handoff retro"
+      echo "aki-project-bootstrap aki-context-sync aki-project-readme aki-project-audit"
       ;;
     game)
-      echo "aki-project-bootstrap aki-context-sync aki-project-readme aki-project-audit aki-grill-with-context grill-me handoff retro aki-game-playtest-audit"
+      echo "aki-project-bootstrap aki-context-sync aki-project-readme aki-project-audit aki-game-playtest-audit"
       ;;
     godot)
-      echo "aki-project-bootstrap aki-context-sync aki-project-readme aki-project-audit aki-grill-with-context grill-me handoff retro aki-game-playtest-audit gda"
+      echo "aki-project-bootstrap aki-context-sync aki-project-readme aki-project-audit aki-game-playtest-audit gda"
       ;;
     opensource)
-      echo "aki-project-bootstrap aki-context-sync aki-project-readme aki-project-audit aki-grill-with-context grill-me handoff retro aki-open-source-audit"
+      echo "aki-project-bootstrap aki-context-sync aki-project-readme aki-project-audit aki-open-source-audit"
       ;;
     all)
       echo "__ALL__"
