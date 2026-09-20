@@ -252,7 +252,6 @@ AVAILABLE_SKILLS="$LOCAL_SKILLS $EXTERNAL_SKILLS"
 SELECTED_SKILLS=""
 GDA_READY=0
 GDA_ROOT="$tmp_dir/godot-agent"
-RESOLVED_SKILL_DIR=""
 
 contains_skill() {
   local needle="$1"
