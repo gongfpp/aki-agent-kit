@@ -22,7 +22,7 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 - `simplification.md` / `game-simplification.md`：项目精简审计。
 - `skill-authoring.md`：Skill 编写原则。
 
-### Skill
+### Skill 列表
 
 - `aki-project-bootstrap`：为项目接入开发原则。
 - `aki-context-sync`：把长期有效的会话结论收敛进项目事实源。
