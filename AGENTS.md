@@ -1,14 +1,14 @@
-# aki-agent-kit Repository Instructions
+# aki-agent-kit 仓库指令
 
 本仓库是个人 AI Agent 开发原则、差异化 Skills 与少量外部 Skill 安装编排的增量层。通用标准优先采用上游，本仓库只维护真正存在个人差异和跨项目复用价值的内容。
 
-## Upstream First
+## 上游优先
 
 - `AGENTS.md` 的格式、发现与优先级以 <https://github.com/agentsmd/agents.md> 及各 Agent 平台实际实现为准。
 - Skill 的格式与目录约定以 <https://github.com/agentskills/agentskills> 为准。
 - 成熟上游 Skill 能直接满足需求时直接依赖上游；只有需要改变行为时才维护 `aki-*` Skill。
 
-## Repository Structure
+## 仓库结构
 
 - `principles/`：跨项目长期原则和专项判断规则。
 - `skills/`：本仓库维护的 `aki-*` 工作流。
@@ -18,7 +18,7 @@
 
 具体项目的技术栈、目录树、文档名、业务或玩法设计属于项目事实，不在中央仓库维护固定模板。
 
-## Installation
+## 安装
 
 安装本仓库管理的 Skills 时使用 `scripts/install.sh`：
 
@@ -36,7 +36,7 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 
 默认安装到 `~/.agents/skills`。安装器同时同步中央规则到 `~/.agents/aki-agent-kit/rules/`；项目优先读取本地规则缓存，缺失或用户明确刷新时才访问远端。
 
-## Principles
+## 原则
 
 - 普通项目：`principles/project-development.md`
 - 游戏补充：`principles/game-development.md`
@@ -47,13 +47,15 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 
 中央原则只定义跨项目默认判断，不替具体项目决定架构、目录、技术栈或业务/玩法实现。游戏原则只补充游戏独有内容，不重复通用原则。
 
+仓库自有的人类可读开发内容遵循 `principles/project-development.md` 的语言规范。
+
 新增或修改 Skill 时必须读取并遵循 `principles/skill-authoring.md`；幂等、managed region、内容去重和当前状态规则以该文件为准，不在本文件重复定义。
 
 ## Git
 
 仓库修改遵循 `principles/git.md`。较大修改使用独立分支；是否 push、创建 PR、合并或执行其他远端操作由项目流程、用户指令和当前任务边界共同决定。
 
-## Validation
+## 验证
 
 修改后至少确认：
 
