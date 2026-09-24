@@ -1,7 +1,7 @@
-# Project Agent Instructions
+# 项目 Agent 指令
 
 <!-- aki-agent-kit:bootstrap:start -->
-## Personal Development Baseline
+## 个人开发基线
 
 Project profile: `{{PROJECT_PROFILE}}`
 
