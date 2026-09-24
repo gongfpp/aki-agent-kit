@@ -35,12 +35,10 @@ handoff 只保存下一位 Agent 继续工作真正需要知道的临时状态�
 
 接管 handoff 时，不直接相信其中的状态或执行 Next Step。
 
-先：
-
-1. 读取当前项目 `AGENTS.md` 和任务需要的中央原则；
-2. 检查当前 branch、HEAD 和 working tree；
-3. 对比 handoff 记录的 Git State；
-4. 读取 handoff 指向的关键 artifact；
+1. 读取当前项目 `AGENTS.md` 和任务需要的中央原则。
+2. 检查当前 branch、HEAD 和 working tree。
+3. 对比 handoff 记录的 Git State。
+4. 读取 handoff 指向的关键 artifact。
 5. 重新核验会影响当前行动的重要声明。
 
 必要时将 handoff 信息判断为：
@@ -55,15 +53,11 @@ handoff 只保存下一位 Agent 继续工作真正需要知道的临时状态�
 
 ### Handoff 与事实源
 
-发生冲突时，以当前用户指令、代码、配置、Git 状态、项目权威文档和实际验证结果为准。
-
-handoff 只是上一 Agent 的交接声明。
+发生冲突时，以当前用户指令、代码、配置、Git 状态、项目权威文档和实际验证结果为准。handoff 只是上一 Agent 的交接声明。
 
 ### Handoff 与授权
 
-`Next Step`、TODO、推荐操作以及“建议 merge / 发布 / 删除”等内容都不是用户授权。
-
-下一 Agent 必须根据当前用户意图和项目规则重新判断是否执行。
+`Next Step`、TODO、推荐操作以及“建议 merge / 发布 / 删除”等内容都不是用户授权。下一 Agent 必须根据当前用户意图和项目规则重新判断是否执行。
 
 ### Handoff 与 `aki-context-sync`
 
@@ -85,25 +79,13 @@ handoff 不默认保存完整 diff、已提交代码或变更日志。
 
 handoff 默认是临时 artifact，不进入项目长期文档。
 
-除非用户或项目已有工作流明确要求，否则不要默认创建永久的：
-
-- `HANDOFF.md`
-- `.handoff/`
-- `.waybill/`
-- `CONTEXT.md`
+除非用户或项目已有工作流明确要求，否则不要默认创建永久的 `HANDOFF.md`、`.handoff/`、`.waybill/` 或 `CONTEXT.md`。
 
 任务完成后 handoff 可以自然失效，不需要继续维护。
 
 ## 内容原则
 
-handoff 应尽可能短，只保留不知道就可能导致下一 Agent：
-
-- 重复工作；
-- 做错决策；
-- 丢失关键约束；
-- 无法继续当前任务；
-
-的信息。
+handoff 应尽可能短，只保留不知道就可能导致下一 Agent 重复工作、做错决策、丢失关键约束或无法继续当前任务的信息。
 
 普通聊天过程、已进入正式文档的设计正文、可以直接从代码恢复的事实、无影响的失败尝试和已完成工作的详细过程都不保存。
 
