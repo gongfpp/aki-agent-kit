@@ -78,12 +78,12 @@ catalog_preset_skills() {
 
 catalog_preset_summary() {
   case "$1" in
-    core) echo "minimal project baseline" ;;
-    project) echo "default software project set" ;;
-    game) echo "generic game development set" ;;
-    godot) echo "game set + Godot automation" ;;
-    opensource) echo "project set + open-source audit" ;;
-    all) echo "all managed Skills" ;;
+    core) echo "最小项目基础能力" ;;
+    project) echo "普通软件项目默认集合" ;;
+    game) echo "通用游戏开发集合" ;;
+    godot) echo "游戏集合 + Godot 自动化" ;;
+    opensource) echo "项目集合 + 开源前审计" ;;
+    all) echo "全部受管 Skill" ;;
     *) return 1 ;;
   esac
 }
