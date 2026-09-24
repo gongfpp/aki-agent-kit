@@ -29,7 +29,7 @@ catalog_skill_summary() {
     aki-open-source-audit) echo "开源前安全与合规审计" ;;
     aki-game-playtest-audit) echo "游戏玩家路径与试玩审计" ;;
     aki-grill-with-context) echo "自包含的决策树式深度澄清 + context sync" ;;
-    aki-handoff) echo "Agent 会话交接与接管核验" ;;
+    aki-handoff) echo "短暂、可核验的 Agent 会话交接与接管核验" ;;
     aki-rednote-cover) echo "小红书封面生成（个人专用）" ;;
     gda) echo "Godot 自动化 · aigengame" ;;
     *) echo "Skill" ;;

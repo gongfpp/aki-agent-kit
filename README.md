@@ -32,6 +32,7 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 - `aki-open-source-audit`：开源前审计敏感信息、历史、许可证和第三方资产。
 - `aki-game-playtest-audit`：从真实玩家路径审计游戏体验。
 - `aki-grill-with-context`：用自包含的决策树式追问澄清计划，并在确认后同步长期结论。
+- `aki-handoff`：为未完成任务生成或接管短暂、可核验的 Agent 交接。
 - `aki-rednote-cover`：个人专用的小红书封面 Skill。
 
 安装器还会在 `godot` preset 中安装 Godot 自动化 Skill `gda`。
