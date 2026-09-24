@@ -22,7 +22,7 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 - `simplification.md` / `game-simplification.md`：项目精简审计。
 - `skill-authoring.md`：Skill 编写原则。
 
-### Skills
+### Skill
 
 - `aki-project-bootstrap`：为项目接入开发原则。
 - `aki-context-sync`：把长期有效的会话结论收敛进项目事实源。
@@ -36,7 +36,7 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 
 安装器还会在 `godot` preset 中安装 Godot 自动化 Skill `gda`。
 
-## Preset
+## 预设
 
 - `core`：最小项目基础能力。
 - `project`：普通软件项目默认集合。
