@@ -3,7 +3,7 @@
 <!-- aki-agent-kit:bootstrap:start -->
 ## 个人开发基线
 
-Project profile: `{{PROJECT_PROFILE}}`
+项目 profile： `{{PROJECT_PROFILE}}`
 
 中央规则本地缓存目录：`~/.agents/aki-agent-kit/rules/principles/`  
 远程回退目录：`https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/principles/`
