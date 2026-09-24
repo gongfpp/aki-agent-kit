@@ -14,7 +14,7 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 
 ## 包含内容
 
-### Principles
+### 原则
 
 - `project-development.md`：跨项目开发基线与判断边界。
 - `game-development.md`：独立游戏项目补充原则。
@@ -28,16 +28,15 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 - `aki-context-sync`：把长期有效的会话结论收敛进项目事实源。
 - `aki-handoff`：生成和接管短暂、可核验的 Agent 交接上下文。
 - `aki-project-readme`：生成、重写和审查项目 README。
-- `aki-project-audit`：全面审计项目正确性、架构、安全、测试、文档和用户体验。
+- `aki-project-audit`：全面审计普通工程项目的正确性、架构、安全、测试、文档和用户体验。
 - `aki-open-source-audit`：开源前审计敏感信息、历史、许可证和第三方资产。
-- `aki-game-playtest-audit`：从真实玩家路径审计游戏体验。
+- `aki-game-audit`：结合真实玩家路径和游戏工程结构全面审计游戏项目。
 - `aki-grill-with-context`：用自包含的决策树式追问澄清计划，并在确认后同步长期结论。
-- `aki-handoff`：为未完成任务生成或接管短暂、可核验的 Agent 交接。
 - `aki-rednote-cover`：个人专用的小红书封面 Skill。
 
 安装器还会在 `godot` preset 中安装 Godot 自动化 Skill `gda`。
 
-## Presets
+## Preset
 
 - `core`：最小项目基础能力。
 - `project`：普通软件项目默认集合。
@@ -54,8 +53,8 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 使用 aki-context-sync 收敛当前会话上下文。
 使用 aki-handoff 为下一位 Agent 生成交接，或核验已有 handoff 后继续任务。
 使用 aki-project-readme 审查并完善当前项目 README。
-使用 aki-project-audit 全面审计当前项目。
+使用 aki-project-audit 全面审计当前普通工程项目。
 使用 aki-open-source-audit 做开源前审计。
-使用 aki-game-playtest-audit 从玩家路径审计当前游戏。
+使用 aki-game-audit 全面审计当前游戏项目。
 使用 gda 操作并验证当前 Godot 项目。
 ```
