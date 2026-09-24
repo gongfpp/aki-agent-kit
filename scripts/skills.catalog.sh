@@ -29,6 +29,7 @@ catalog_skill_summary() {
     aki-open-source-audit) echo "开源前安全与合规审计" ;;
     aki-game-playtest-audit) echo "游戏玩家路径与试玩审计" ;;
     aki-grill-with-context) echo "自包含的决策树式深度澄清 + context sync" ;;
+    aki-handoff) echo "Agent 会话交接与接管核验" ;;
     aki-rednote-cover) echo "小红书封面生成（个人专用）" ;;
     gda) echo "Godot 自动化 · aigengame" ;;
     *) echo "Skill" ;;
@@ -55,16 +56,16 @@ catalog_preset_skills() {
       echo "aki-project-bootstrap aki-context-sync"
       ;;
     project)
-      echo "aki-project-bootstrap aki-context-sync aki-project-readme aki-project-audit aki-grill-with-context"
+      echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-project-audit aki-grill-with-context"
       ;;
     game)
-      echo "aki-project-bootstrap aki-context-sync aki-project-readme aki-project-audit aki-grill-with-context aki-game-playtest-audit"
+      echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-project-audit aki-grill-with-context aki-game-playtest-audit"
       ;;
     godot)
-      echo "aki-project-bootstrap aki-context-sync aki-project-readme aki-project-audit aki-grill-with-context aki-game-playtest-audit gda"
+      echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-project-audit aki-grill-with-context aki-game-playtest-audit gda"
       ;;
     opensource)
-      echo "aki-project-bootstrap aki-context-sync aki-project-readme aki-project-audit aki-grill-with-context aki-open-source-audit"
+      echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-project-audit aki-grill-with-context aki-open-source-audit"
       ;;
     all)
       echo "__ALL__"

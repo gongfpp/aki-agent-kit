@@ -26,6 +26,7 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 
 - `aki-project-bootstrap`：为项目接入开发原则。
 - `aki-context-sync`：把长期有效的会话结论收敛进项目事实源。
+- `aki-handoff`：生成和接管短暂、可核验的 Agent 交接上下文。
 - `aki-project-readme`：生成、重写和审查项目 README。
 - `aki-project-audit`：全面审计项目正确性、架构、安全、测试、文档和用户体验。
 - `aki-open-source-audit`：开源前审计敏感信息、历史、许可证和第三方资产。
@@ -50,6 +51,7 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 使用 aki-project-bootstrap 初始化当前项目。
 使用 aki-grill-with-context 深度澄清这个设计，并在确认后同步长期结论。
 使用 aki-context-sync 收敛当前会话上下文。
+使用 aki-handoff 为下一位 Agent 生成交接，或核验已有 handoff 后继续任务。
 使用 aki-project-readme 审查并完善当前项目 README。
 使用 aki-project-audit 全面审计当前项目。
 使用 aki-open-source-audit 做开源前审计。
