@@ -20,9 +20,9 @@
 
 除通用精简审计要求外，每个重要候选还应说明：
 
-- **Player impact**：玩家能否感知变化；
-- **Content impact**：减少或新增多少持续内容生产；
-- **Save/resource risk**：存档、场景、资源和序列化引用风险；
-- **Tooling impact**：编辑器工具、Debug 流程和开发场景是否受影响。
+- **玩家影响**：玩家能否感知变化；
+- **内容影响**：减少或新增多少持续内容生产；
+- **存档 / 资源风险**：存档、场景、资源和序列化引用风险；
+- **工具链影响**：编辑器工具、Debug 流程和开发场景是否受影响。
 
 功能删除后同步清理相关 Scene、Resource、Asset、Signal、Input Map、Config、Save Field、Localization、Animation、Audio、Test、Debug UI 和设计文档，避免留下半套失效系统。
