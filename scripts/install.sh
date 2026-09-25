@@ -139,13 +139,12 @@ sync_rules_cache() {
   mv "$stage" "$RULES_DIR"
 }
 
-
 usage() {
   cat <<'TXT'
 aki-agent-kit Skill Installer
 
 Usage:
-  install.sh                       install the default project preset
+  install.sh                       choose a preset interactively; Enter defaults to project
   install.sh --set NAME            install a named preset; use --list to inspect current presets
   install.sh --skills a,b,c        install exact Skills; dependencies auto-added
   install.sh --list                list current presets and Skills
@@ -198,10 +197,6 @@ done
 if [ -n "$REQUESTED_SET" ] && [ -n "$REQUESTED_SKILLS" ]; then
   ui_error "--set 与 --skills 不能同时使用 / cannot be used together"
   exit 1
-fi
-
-if [ -z "$REQUESTED_SET" ] && [ -z "$REQUESTED_SKILLS" ]; then
-  REQUESTED_SET="project"
 fi
 
 if ! command -v git >/dev/null 2>&1; then
@@ -266,7 +261,10 @@ print_presets() {
   local preset
   ui_section "预设 / Presets"
   for preset in $(catalog_presets); do
-    printf '  %-12s %s%s\n' "$preset" "$(catalog_preset_summary "$preset")" "$( [ "$preset" = "project" ] && printf '  (default)' || true )"
+    printf '  %-12s %s%s\n' \
+      "$preset" \
+      "$(catalog_preset_summary "$preset")" \
+      "$( [ "$preset" = "project" ] && printf '  (default)' || true )"
   done
 }
 
@@ -278,10 +276,76 @@ print_available() {
   done
 }
 
+choose_preset() {
+  local choices="project"
+  local preset
+  local choice
+  local selected=""
+  local index=1
+
+  # 默认 project 放第一位，其余 preset 顺序仍来自 catalog。
+  for preset in $(catalog_presets); do
+    [ "$preset" = "project" ] && continue
+    choices="$choices $preset"
+  done
+
+  ui_section "选择安装集合 / Choose preset"
+
+  for preset in $choices; do
+    if [ "$preset" = "project" ]; then
+      printf '  %s) %-12s %s  %b(default)%b\n' \
+        "$index" \
+        "$preset" \
+        "$(catalog_preset_summary "$preset")" \
+        "$DIM" "$RESET"
+    else
+      printf '  %s) %-12s %s\n' \
+        "$index" \
+        "$preset" \
+        "$(catalog_preset_summary "$preset")"
+    fi
+    index=$((index + 1))
+  done
+
+  # curl ... | bash 时 stdin 用于脚本本身，因此交互输入必须从 /dev/tty 读取。
+  # CI、后台任务等没有终端时保持旧行为：直接使用默认 project。
+  if ! (: </dev/tty) 2>/dev/null; then
+    REQUESTED_SET="project"
+    ui_info "非交互环境，使用默认 preset: project"
+    return
+  fi
+
+  printf '\n  请选择 [1]: ' > /dev/tty
+  IFS= read -r choice < /dev/tty || choice=""
+
+  # 什么都不输入直接回车，仍使用当前默认 project。
+  [ -n "$choice" ] || choice="1"
+
+  index=1
+  for preset in $choices; do
+    if [ "$choice" = "$index" ] || [ "$choice" = "$preset" ]; then
+      selected="$preset"
+      break
+    fi
+    index=$((index + 1))
+  done
+
+  if [ -z "$selected" ]; then
+    ui_error "无效选择 / Invalid preset: $choice"
+    exit 1
+  fi
+
+  REQUESTED_SET="$selected"
+}
+
 if [ "$LIST_ONLY" -eq 1 ]; then
   print_presets
   print_available
   exit 0
+fi
+
+if [ -z "$REQUESTED_SET" ] && [ -z "$REQUESTED_SKILLS" ]; then
+  choose_preset
 fi
 
 add_selected() {
@@ -309,6 +373,7 @@ else
     ui_error "未知集合 / Unknown preset: $REQUESTED_SET"
     exit 1
   fi
+
   if [ "$preset_skills" = "__ALL__" ]; then
     for name in $AVAILABLE_SKILLS; do
       add_selected "$name"
@@ -331,7 +396,10 @@ while :; do
   [ "$before" = "$SELECTED_SKILLS" ] && break
 done
 
-[ -n "$SELECTED_SKILLS" ] || { ui_error "最终 Skill 集合为空 / Final Skill set is empty"; exit 1; }
+[ -n "$SELECTED_SKILLS" ] || {
+  ui_error "最终 Skill 集合为空 / Final Skill set is empty"
+  exit 1
+}
 
 if [ -n "$REQUESTED_SKILLS" ]; then
   preset_label="custom"
@@ -343,19 +411,24 @@ ui_section "安装计划 / Plan"
 ui_kv "preset" "$preset_label"
 ui_kv "destination" "$(display_path "$DEST_DIR")"
 ui_kv "skills" "$(count_skills "$SELECTED_SKILLS")"
+
 if [ "$VERBOSE" = "1" ]; then
   ui_kv "source" "$REPO_URL@$REF"
   printf '    %-12s %s\n' "selected" "$SELECTED_SKILLS"
 fi
 
-
 ensure_gda_repo() {
-  if [ "$GDA_READY" -eq 1 ]; then return; fi
+  if [ "$GDA_READY" -eq 1 ]; then
+    return
+  fi
+
   ui_info "aigengame/godot-agent · fetching"
+
   if ! git_clone_repo "$GDA_REF" "$GDA_REPO" "$GDA_ROOT"; then
     ui_error "无法读取 aigengame/godot-agent / Failed to fetch aigengame/godot-agent"
     exit 1
   fi
+
   GDA_READY=1
 }
 
@@ -388,9 +461,11 @@ install_from_dir() {
   rm -rf "$stage"
   mkdir -p "$stage"
   cp -R "$src"/. "$stage"/
+
   if [ -n "$license_file" ] && [ -f "$license_file" ]; then
     cp "$license_file" "$stage/LICENSE.upstream"
   fi
+
   printf '%s\n' \
     "managed-by=aki-agent-kit" \
     "source=$source" \
@@ -424,22 +499,46 @@ install_one() {
   case "$provider" in
     gda)
       ensure_gda_repo
+
       if command -v gda >/dev/null 2>&1; then
         generated="$tmp_dir/gda-generated"
         rm -rf "$generated"
         mkdir -p "$generated"
+
         if gda skill > "$generated/SKILL.md"; then
-          install_from_dir "$name" "$generated" "installed-gda-cli" "version-aligned" "$GDA_ROOT/LICENSE"
+          install_from_dir \
+            "$name" \
+            "$generated" \
+            "installed-gda-cli" \
+            "version-aligned" \
+            "$GDA_ROOT/LICENSE"
         else
-          install_from_dir "$name" "$GDA_ROOT/src/gda/skill" "$GDA_REPO" "$GDA_REF" "$GDA_ROOT/LICENSE"
+          install_from_dir \
+            "$name" \
+            "$GDA_ROOT/src/gda/skill" \
+            "$GDA_REPO" \
+            "$GDA_REF" \
+            "$GDA_ROOT/LICENSE"
         fi
       else
-        install_from_dir "$name" "$GDA_ROOT/src/gda/skill" "$GDA_REPO" "$GDA_REF" "$GDA_ROOT/LICENSE"
+        install_from_dir \
+          "$name" \
+          "$GDA_ROOT/src/gda/skill" \
+          "$GDA_REPO" \
+          "$GDA_REF" \
+          "$GDA_ROOT/LICENSE"
       fi
       ;;
+
     local)
-      install_from_dir "$name" "$tmp_dir/repo/skills/$name" "$REPO_URL" "$REF" ""
+      install_from_dir \
+        "$name" \
+        "$tmp_dir/repo/skills/$name" \
+        "$REPO_URL" \
+        "$REF" \
+        ""
       ;;
+
     *)
       ui_error "未知 Skill provider / Unknown provider for $name: $provider"
       exit 1
@@ -448,16 +547,18 @@ install_one() {
 }
 
 ui_section "同步 Skills / Sync"
+
 for name in $SELECTED_SKILLS; do
   install_one "$name"
 done
-
 
 # 收敛所有曾由本安装器管理的目录，包括外部 Skill。
 for dest in "$DEST_DIR"/*; do
   [ -d "$dest" ] || continue
   [ -f "$dest/.aki-agent-kit-managed" ] || continue
+
   name="$(basename "$dest")"
+
   if ! contains_skill "$name" "$SELECTED_SKILLS"; then
     rm -rf "$dest"
     removed=$((removed + 1))
@@ -465,8 +566,18 @@ for dest in "$DEST_DIR"/*; do
   fi
 done
 
-printf '\n%b✓%b %b完成 / Done%b\n' "$GREEN" "$RESET" "$BOLD" "$RESET"
-printf '  %s installed  ·  %s updated  ·  %s unchanged  ·  %s removed\n' "$installed" "$updated" "$unchanged" "$removed"
+printf '\n%b✓%b %b完成 / Done%b\n' \
+  "$GREEN" \
+  "$RESET" \
+  "$BOLD" \
+  "$RESET"
+
+printf '  %s installed  ·  %s updated  ·  %s unchanged  ·  %s removed\n' \
+  "$installed" \
+  "$updated" \
+  "$unchanged" \
+  "$removed"
+
 printf '  %s\n' "$(display_path "$DEST_DIR")"
 
 if contains_skill "gda" "$SELECTED_SKILLS" && ! command -v gda >/dev/null 2>&1; then
@@ -476,4 +587,6 @@ fi
 
 ui_section "下一步 / Next"
 printf '  新会话即可使用这些 Skills；未发现时重启 Agent。\n'
-printf '  %b再次运行同一命令即可更新并收敛受管 Skills。%b\n' "$DIM" "$RESET"
+printf '  %b再次运行同一命令即可更新并收敛受管 Skills。%b\n' \
+  "$DIM" \
+  "$RESET"
