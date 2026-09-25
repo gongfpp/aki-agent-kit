@@ -20,9 +20,9 @@
 
 把消费者区分为：
 
-- **Production**：真实源码、loader、config 和 runtime 路径；
-- **Non-production**：tests、docs、README、snapshot、comments；
-- **Ambiguous**：example、script、support 等可能进入真实运行路径的内容，需要继续确认。
+- **生产**：真实源码、loader、config 和 runtime 路径；
+- **非生产**：tests、docs、README、snapshot、comments；
+- **需确认**：example、script、support 等可能进入真实运行路径的内容，需要继续确认。
 
 存在生产消费者时，不把“代码复杂”本身当作删除理由。
 
@@ -57,11 +57,11 @@
 
 每个重要候选说明：
 
-- **Problem**：复杂度和消费者证据；
-- **Proposal**：准备删除、合并、降级、迁移或内联什么；
-- **What we give up**：失去的能力；
-- **Acceptance criteria**：完成后必须成立的行为；
-- **Risks**：API、数据、行为和迁移风险。
+- **问题**：复杂度和消费者证据；
+- **建议**：准备删除、合并、降级、迁移或内联什么；
+- **代价**：失去的能力；
+- **验收条件**：完成后必须成立的行为；
+- **风险**：API、数据、行为和迁移风险。
 
 执行精简时同步收敛相关测试、注释、README、JSDoc、配置和生成物。
 

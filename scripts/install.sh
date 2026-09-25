@@ -11,7 +11,7 @@ RULES_DIR="$HOME/.agents/aki-agent-kit/rules"
 LIST_ONLY=0
 VERBOSE="${AKI_INSTALL_VERBOSE:-0}"
 
-# Keep the installer readable in interactive terminals without polluting logs or NO_COLOR environments.
+# 保持交互终端中的安装器输出易读，同时避免污染日志或 NO_COLOR 环境。
 if [ -t 1 ] && [ "${TERM:-}" != "dumb" ] && [ -z "${NO_COLOR:-}" ]; then
   BOLD='\033[1m'
   DIM='\033[2m'
@@ -235,7 +235,7 @@ rm -f "$DEST_DIR/.aki-agent-kit-provider-matt"
 GDA_REPO="${AKI_GDA_REPO:-$(catalog_provider_repo gda)}"
 GDA_REF="${AKI_GDA_REF:-$(catalog_provider_ref gda)}"
 
-# Plain whitespace-separated lists keep compatibility with macOS system Bash 3.2 + set -u.
+# 使用空白分隔的普通字符串列表，保持兼容 macOS 系统 Bash 3.2 与 set -u。
 LOCAL_SKILLS=""
 for src in "$tmp_dir"/repo/skills/*; do
   [ -d "$src" ] || continue
@@ -320,7 +320,7 @@ else
   fi
 fi
 
-# Resolve dependencies to a fixed point so catalog entries can depend on other managed Skills.
+# 反复解析依赖直到集合稳定，使 catalog 项可以依赖其他受管 Skill。
 while :; do
   before="$SELECTED_SKILLS"
   for name in $SELECTED_SKILLS; do
@@ -453,7 +453,7 @@ for name in $SELECTED_SKILLS; do
 done
 
 
-# Converge every directory previously managed by this installer, including external Skills.
+# 收敛所有曾由本安装器管理的目录，包括外部 Skill。
 for dest in "$DEST_DIR"/*; do
   [ -d "$dest" ] || continue
   [ -f "$dest/.aki-agent-kit-managed" ] || continue

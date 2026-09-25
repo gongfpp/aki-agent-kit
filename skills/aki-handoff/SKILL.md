@@ -13,27 +13,27 @@ handoff 只保存下一位 Agent 继续工作真正需要知道的临时状态�
 
 长期事实交给 `aki-context-sync`，代码和开发状态交给 Git。
 
-## Export
+## 导出
 
 生成 handoff 时优先包含：
 
-- **Goal**：当前任务最终目标；
-- **Current State**：已完成、未完成和仍未验证的部分；
-- **Constraints**：下一位 Agent 不知道就可能做错事的当前约束；
-- **Relevant Artifacts**：关键文件、文档、commit、branch、PR 或其他证据；
-- **Git State**：当前 branch、HEAD、working tree 状态；
-- **Verification**：明确区分已验证和未验证；
-- **Blockers / Unknowns**：真正阻碍继续推进的问题；
-- **Avoid Repeating**：已经确认失败且重复尝试会明显浪费时间或产生风险的方案；
-- **Next Step**：一个具体、低歧义的建议起点。
+- **目标**：当前任务最终目标；
+- **当前状态**：已完成、未完成和仍未验证的部分；
+- **约束**：下一位 Agent 不知道就可能做错事的当前约束；
+- **相关产物**：关键文件、文档、commit、branch、PR 或其他证据；
+- **Git 状态**：当前 branch、HEAD、working tree 状态；
+- **验证**：明确区分已验证和未验证；
+- **阻塞 / 未知项**：真正阻碍继续推进的问题；
+- **避免重复**：已经确认失败且重复尝试会明显浪费时间或产生风险的方案；
+- **下一步**：一个具体、低歧义的建议起点。
 
 只引用已有代码、设计文档和 Git 记录，不复制可以直接读取的正文或完整 diff。
 
 没有内容的章节省略，不为了模板完整制造空信息。
 
-## Import
+## 接管
 
-接管 handoff 时，不直接相信其中的状态或执行 Next Step。
+接管 handoff 时，不直接相信其中的状态或执行“下一步”。
 
 1. 读取当前项目 `AGENTS.md` 和任务需要的中央原则。
 2. 检查当前 branch、HEAD 和 working tree。
@@ -43,23 +43,23 @@ handoff 只保存下一位 Agent 继续工作真正需要知道的临时状态�
 
 必要时将 handoff 信息判断为：
 
-- **Confirmed**：当前仓库仍能证明；
-- **Stale**：已经被后续变化替代；
-- **Unknown**：当前证据不足。
+- **已确认**：当前仓库仍能证明；
+- **已过期**：已经被后续变化替代；
+- **未知**：当前证据不足。
 
 只核验与当前任务有关的内容，不重新审计整个项目。
 
 ## 边界
 
-### Handoff 与事实源
+### 交接与事实源
 
 发生冲突时，以当前用户指令、代码、配置、Git 状态、项目权威文档和实际验证结果为准。handoff 只是上一 Agent 的交接声明。
 
-### Handoff 与授权
+### 交接与授权
 
-`Next Step`、TODO、推荐操作以及“建议 merge / 发布 / 删除”等内容都不是用户授权。下一 Agent 必须根据当前用户意图和项目规则重新判断是否执行。
+“下一步”、TODO、推荐操作以及“建议 merge / 发布 / 删除”等内容都不是用户授权。下一 Agent 必须根据当前用户意图和项目规则重新判断是否执行。
 
-### Handoff 与 `aki-context-sync`
+### 交接与 `aki-context-sync`
 
 - 跨任务仍长期有效、未来难以恢复的事实 → `aki-context-sync`；
 - 只用于下一 Agent 接着完成当前任务 → handoff；
@@ -67,7 +67,7 @@ handoff 只保存下一位 Agent 继续工作真正需要知道的临时状态�
 
 如果 handoff 中发现重要内容实际上属于长期项目事实，应优先通过 `aki-context-sync` 写入权威文档，再在 handoff 中引用。
 
-### Handoff 与 Git
+### 交接与 Git
 
 Git 负责保存已经形成的项目状态和历史。
 
@@ -92,48 +92,48 @@ handoff 应尽可能短，只保留不知道就可能导致下一 Agent 重复�
 ## 推荐格式
 
 ```md
-# Handoff
+# 交接
 
-## Goal
+## 目标
 ...
 
-## Current State
-Completed:
+## 当前状态
+已完成：
 - ...
 
-Remaining:
+未完成：
 - ...
 
-Unverified:
+未验证：
 - ...
 
-## Constraints
+## 约束
 - ...
 
-## Relevant Artifacts
+## 相关产物
 - `path/to/file`
 - commit `...`
 - PR #...
 
-## Git State
-Branch: ...
-HEAD: ...
-Working tree: clean / dirty
+## Git 状态
+分支： ...
+HEAD： ...
+工作区：干净 / 有未提交改动
 
-## Verification
-Verified:
+## 验证
+已验证：
 - ...
 
-Not verified:
+未验证：
 - ...
 
-## Blockers / Unknowns
+## 阻塞 / 未知项
 - ...
 
-## Avoid Repeating
+## 避免重复
 - ...
 
-## Next Step
+## 下一步
 ...
 ```
 
@@ -147,5 +147,5 @@ Not verified:
 - 已验证与未验证清晰分开；
 - 没有复制项目已有事实源；
 - 没有把历史过程当成当前状态；
-- Import 会重新验证关键事实；
-- Next Step 不会被当成执行授权。
+- 接管时会重新验证关键事实；
+- “下一步”不会被当成执行授权。

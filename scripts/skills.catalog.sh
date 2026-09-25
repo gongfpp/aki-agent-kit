@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
-# Declarative catalog for installer-managed Skills and presets.
-# Keep metadata here; scripts/install.sh owns installation mechanics only.
-# Use plain strings/functions for compatibility with macOS system Bash 3.2.
+# 安装器管理的 Skill 与 preset 声明式目录。
+# 元数据统一维护在这里；scripts/install.sh 只负责安装机制。
+# 使用普通字符串和函数，保持兼容 macOS 系统 Bash 3.2。
 
 EXTERNAL_SKILLS="gda"
 
@@ -25,9 +25,9 @@ catalog_skill_summary() {
     aki-project-bootstrap) echo "项目接入与 AGENTS.md 初始化" ;;
     aki-context-sync) echo "会话上下文持久化与文档收敛" ;;
     aki-project-readme) echo "项目 README 生成、审查与维护" ;;
-    aki-project-audit) echo "项目全面审计" ;;
+    aki-project-audit) echo "普通工程项目全面审计" ;;
     aki-open-source-audit) echo "开源前安全与合规审计" ;;
-    aki-game-playtest-audit) echo "游戏玩家路径与试玩审计" ;;
+    aki-game-audit) echo "游戏项目全面审计" ;;
     aki-grill-with-context) echo "自包含的决策树式深度澄清 + context sync" ;;
     aki-handoff) echo "短暂、可核验的 Agent 会话交接与接管核验" ;;
     aki-rednote-cover) echo "小红书封面生成（个人专用）" ;;
@@ -59,10 +59,10 @@ catalog_preset_skills() {
       echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-project-audit aki-grill-with-context"
       ;;
     game)
-      echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-project-audit aki-grill-with-context aki-game-playtest-audit"
+      echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-game-audit aki-grill-with-context"
       ;;
     godot)
-      echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-project-audit aki-grill-with-context aki-game-playtest-audit gda"
+      echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-game-audit aki-grill-with-context gda"
       ;;
     opensource)
       echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-project-audit aki-grill-with-context aki-open-source-audit"
@@ -78,12 +78,12 @@ catalog_preset_skills() {
 
 catalog_preset_summary() {
   case "$1" in
-    core) echo "minimal project baseline" ;;
-    project) echo "default software project set" ;;
-    game) echo "generic game development set" ;;
-    godot) echo "game set + Godot automation" ;;
-    opensource) echo "project set + open-source audit" ;;
-    all) echo "all managed Skills" ;;
+    core) echo "最小项目基础能力" ;;
+    project) echo "普通软件项目默认集合" ;;
+    game) echo "通用游戏开发集合" ;;
+    godot) echo "游戏集合 + Godot 自动化" ;;
+    opensource) echo "项目集合 + 开源前审计" ;;
+    all) echo "全部受管 Skill" ;;
     *) return 1 ;;
   esac
 }
