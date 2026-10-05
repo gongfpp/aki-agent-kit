@@ -1,6 +1,6 @@
 # aki-agent-kit
 
-个人 AI Agent 开发工作流的增量层：维护跨项目开发原则、个人差异化 Skills，以及精选外部 Skills 的安装编排。
+一套可复用的 AI 开发规则和小工具：帮你准备项目开发说明、保存重要约定、检查项目问题，并在换对话时接着做。
 
 ![aki-agent-kit 仓库封面](assets/aki-agent-kit-social-preview.jpg)
 
@@ -10,51 +10,74 @@
 curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh | bash
 ```
 
-默认安装 `project` preset 到 `~/.agents/skills`。安装时会把中央规则同步到 `~/.agents/aki-agent-kit/rules/`；后续新会话优先读取本地缓存，只有对应文件不存在时才访问 GitHub。
+Skills 安装到 `~/.agents/skills`。普通软件开发选择 `project`；在终端出现选择提示时，直接回车即可。也可以通过参数直接指定组合：
 
-## 包含内容
+```bash
+curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
+  | bash -s -- --set project
+```
 
-### 原则
+安装时还会把公共开发规则保存到 `~/.agents/aki-agent-kit/rules/`。后续对话优先读取这份本地内容；文件缺失或你要求刷新时才访问远端。再次安装会更新这些规则。
 
-- `project-development.md`：跨项目开发基线与判断边界。
-- `game-development.md`：独立游戏项目补充原则。
-- `git.md`：Git 版本管理与仓库卫生。
-- `simplification.md` / `game-simplification.md`：项目精简审计。
-- `skill-authoring.md`：Skill 编写原则。
+## 有哪些功能？
 
-### Skill 列表
+| Skill | 用途 |
+| --- | --- |
+| `aki-project-bootstrap` | 准备项目的 AI 开发说明 `AGENTS.md` |
+| `aki-context-sync` | 把本次讨论中值得长期保留的约定保存到项目文档 |
+| `aki-handoff` | 整理当前对话，让下一个 AI 接着处理同一件事；也能检查并接手指定的交接说明 |
+| `aki-project-readme` | 写好项目介绍和使用说明 |
+| `aki-project-audit` | 检查软件项目的问题，说明影响并提出改进建议 |
+| `aki-open-source-audit` | 检查公开前是否还有密码、私人数据、素材授权等问题 |
+| `aki-game-audit` | 检查游戏体验、运行问题和后续制作成本 |
+| `aki-grill-with-context` | 把想法讨论清楚，在你确认后保存重要结论 |
+| `aki-rednote-cover` | 制作带三颗草和用户名的个人小红书封面 |
 
-- `aki-project-bootstrap`：为项目接入开发原则。
-- `aki-context-sync`：把长期有效的会话结论收敛进项目事实源。
-- `aki-handoff`：生成和接管短暂、可核验的 Agent 交接上下文。
-- `aki-project-readme`：生成、重写和审查项目 README。
-- `aki-project-audit`：全面审计普通工程项目的正确性、架构、安全、测试、文档和用户体验。
-- `aki-open-source-audit`：开源前审计敏感信息、历史、许可证和第三方资产。
-- `aki-game-audit`：结合真实玩家路径和游戏工程结构全面审计游戏项目。
-- `aki-grill-with-context`：用自包含的决策树式追问澄清计划，并在确认后同步长期结论。
-- `aki-rednote-cover`：个人专用的小红书封面 Skill。
+`godot` 组合还包含外部工具说明 `gda`，用于操作 Godot、运行游戏并获取截图和日志。实际操作需要安装对应工具，安装器会在缺少工具时提示。
 
-安装器还会在 `godot` preset 中安装 Godot 自动化 Skill `gda`。
+## 选择安装组合
 
-## 预设
+| 参数 | 适合的用途 |
+| --- | --- |
+| `--set core` | 只准备开发说明、保存讨论约定 |
+| `--set project` | 日常软件开发 |
+| `--set game` | 通用游戏开发 |
+| `--set godot` | 游戏开发，加上 Godot 操作工具说明 |
+| `--set opensource` | 软件开发，加上公开前检查 |
+| `--set all` | 全部功能，包括个人封面工具 |
 
-- `core`：最小项目基础能力。
-- `project`：普通软件项目默认集合。
-- `game`：通用游戏开发能力。
-- `godot`：`game` + Godot 自动化能力。
-- `opensource`：项目能力 + 开源前审计。
-- `all`：全部受管 Skills。
+用 `--list` 查看当前组合和全部 Skill。只需要其中几个时，用 `--skills` 指定名称，安装器会补齐它们需要的其他 Skill：
 
-## 使用
+```bash
+curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/install.sh \
+  | bash -s -- --skills aki-project-bootstrap,aki-handoff
+```
+
+使用相同参数再次运行即可更新。**本安装器以前安装、但本次没有选择的 Skill 会被移除**；不是本安装器创建的同名目录不会被覆盖。
+
+## 怎么使用？
+
+在 AI 开发工具中开启对话，直接说 Skill 名称和需求：
 
 ```text
-使用 aki-project-bootstrap 初始化当前项目。
-使用 aki-grill-with-context 深度澄清这个设计，并在确认后同步长期结论。
-使用 aki-context-sync 收敛当前会话上下文。
-使用 aki-handoff 为下一位 Agent 生成交接，或核验已有 handoff 后继续任务。
-使用 aki-project-readme 审查并完善当前项目 README。
-使用 aki-project-audit 全面审计当前普通工程项目。
-使用 aki-open-source-audit 做开源前审计。
-使用 aki-game-audit 全面审计当前游戏项目。
-使用 gda 操作并验证当前 Godot 项目。
+使用 aki-project-bootstrap 准备当前项目的开发说明。
+使用 aki-grill-with-context 帮我把这个想法讨论清楚。
+使用 aki-context-sync 把这次讨论的重要约定保存到项目文档。
+使用 aki-handoff 交接当前对话，让新对话继续这件事。
+使用 aki-handoff 根据这份交接说明，核对进度后接着做。
+使用 aki-project-readme 改善项目介绍和使用说明。
+使用 aki-project-audit 检查当前软件项目有哪些值得解决的问题。
+使用 aki-open-source-audit 检查这个项目公开前还要处理什么。
+使用 aki-game-audit 检查当前游戏有哪些游玩和实现问题。
+使用 gda 运行当前 Godot 项目并获取截图和日志。
 ```
+
+没有识别到刚安装的 Skill 时，新开对话或重启开发工具。
+
+`aki-handoff` 默认只交接当前对话。一个项目里有多段聊天时，项目文件仅用于核对相关结果；需要汇总其他对话时，请明确指定范围。
+
+## 开发规则放在哪里？
+
+`principles/` 保存通用开发、游戏开发、Git 版本管理、项目精简和 Skill 编写规则。具体项目的目录、功能、玩法和操作方式仍以项目自己的说明为准。
+
+面向用户的回复先说实际结果和影响，必要技术词会解释；工具内部数据、准确命令和文件名仍保持原样。
