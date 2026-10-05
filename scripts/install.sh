@@ -32,7 +32,7 @@ fi
 
 ui_title() {
   printf '\n%baki-agent-kit%b\n' "$BOLD" "$RESET"
-  printf '%bSkill Installer%b\n' "$DIM" "$RESET"
+  printf '%bSkill 安装器 / Skill installer%b\n' "$DIM" "$RESET"
 }
 
 ui_section() {
@@ -44,7 +44,15 @@ ui_kv() {
 }
 
 ui_ok() {
-  printf '  %b✓%b %-30s %b%s%b\n' "$GREEN" "$RESET" "$1" "$DIM" "$2" "$RESET"
+  local label
+  case "$2" in
+    installed) label="已安装 / Installed" ;;
+    updated) label="已更新 / Updated" ;;
+    unchanged) label="无需更新 / Up to date" ;;
+    removed) label="已移除 / Removed" ;;
+    *) label="$2" ;;
+  esac
+  printf '  %b✓%b %-30s %b%s%b\n' "$GREEN" "$RESET" "$1" "$DIM" "$label" "$RESET"
 }
 
 ui_info() {
@@ -141,24 +149,33 @@ sync_rules_cache() {
 
 usage() {
   cat <<'TXT'
-aki-agent-kit Skill Installer
+aki-agent-kit Skill 安装器 / Skill installer
 
-Usage:
-  install.sh                       choose a preset interactively; Enter defaults to project
-  install.sh --set NAME            install a named preset; use --list to inspect current presets
-  install.sh --skills a,b,c        install exact Skills; dependencies auto-added
-  install.sh --list                list current presets and Skills
-  install.sh -v, --verbose         show source and selected Skill details
-  install.sh -h, --help            show help
+用法 / Usage:
+  install.sh                      选择安装组合，回车使用 project
+                                  Choose a bundle; Enter selects project
+  install.sh --set NAME            安装指定组合，可用 --list 查看
+                                  Install a named bundle; inspect choices with --list
+  install.sh --skills a,b,c        指定所需 Skill，自动补齐它们需要的其他 Skill
+                                  Select exact Skills; required Skills are included
+  install.sh --list                查看可选组合和每个 Skill 的用途
+                                  List bundles and what each Skill does
+  install.sh -v, --verbose         显示下载来源和完整选择列表
+                                  Show download sources and the full selection
+  install.sh -h, --help            显示帮助 / Show help
 
-Environment:
-  AKI_SKILLS_DIR       destination, default ~/.agents/skills
-  AKI_SKILL_SET        same as --set
-  AKI_SKILLS           same as --skills
-  AKI_AGENT_KIT_REPO   source repository
-  AKI_AGENT_KIT_REF    source Git ref, default main
-  AKI_INSTALL_VERBOSE  set to 1 for verbose output
-  NO_COLOR             disable ANSI colors
+环境变量 / Environment:
+  AKI_SKILLS_DIR       安装位置，默认 ~/.agents/skills / Install directory
+  AKI_SKILL_SET        与 --set 相同 / Same as --set
+  AKI_SKILLS           与 --skills 相同 / Same as --skills
+  AKI_AGENT_KIT_REPO   下载来源 / Source repository
+  AKI_AGENT_KIT_REF    下载的分支或标签，默认 main / Source branch or tag
+  AKI_INSTALL_VERBOSE  设为 1 显示详情 / Set to 1 for details
+  NO_COLOR            关闭彩色输出 / Disable colors
+
+更新 / Update:
+  使用相同参数再次运行即可更新；本安装器以前安装、但本次未选择的 Skill 会被移除。
+  Rerun with the same arguments to update. Previously managed Skills not selected this time are removed.
 TXT
 }
 
@@ -209,7 +226,7 @@ tmp_dir="$(mktemp -d "${TMPDIR:-/tmp}/aki-agent-kit.XXXXXX")"
 trap 'rm -rf "$tmp_dir"' EXIT
 
 ui_title
-ui_info "读取 Skill catalog / Loading catalog"
+ui_info "读取可安装功能列表 / Loading available Skills"
 if ! load_aki_repo "$tmp_dir/repo"; then
   ui_error "无法读取 aki-agent-kit / Failed to fetch aki-agent-kit"
   exit 1
@@ -217,7 +234,7 @@ fi
 
 CATALOG_FILE="$tmp_dir/repo/scripts/skills.catalog.sh"
 if [ ! -f "$CATALOG_FILE" ]; then
-  ui_error "缺少 Skill catalog / Missing scripts/skills.catalog.sh"
+  ui_error "安装包缺少功能列表 / Missing scripts/skills.catalog.sh"
   exit 1
 fi
 
@@ -259,21 +276,29 @@ contains_skill() {
 
 print_presets() {
   local preset
-  ui_section "预设 / Presets"
+  ui_section "可选安装组合 / Available bundles"
   for preset in $(catalog_presets); do
-    printf '  %-12s %s%s\n' \
+    printf '  %s\n    %s\n    %s\n' \
       "$preset" \
       "$(catalog_preset_summary "$preset")" \
-      "$( [ "$preset" = "project" ] && printf '  (default)' || true )"
+      "$(catalog_preset_summary "$preset" en)"
+  done
+}
+
+print_skill_descriptions() {
+  local names="$1"
+  local name
+  for name in $names; do
+    printf '  %s\n    %s\n    %s\n' \
+      "$name" \
+      "$(catalog_skill_summary "$name")" \
+      "$(catalog_skill_summary "$name" en)"
   done
 }
 
 print_available() {
-  local name
-  ui_section "Skills"
-  for name in $AVAILABLE_SKILLS; do
-    printf '  %-30s %s\n' "$name" "$(catalog_skill_summary "$name")"
-  done
+  ui_section "各功能的用途 / What each Skill does"
+  print_skill_descriptions "$AVAILABLE_SKILLS"
 }
 
 choose_preset() {
@@ -289,21 +314,14 @@ choose_preset() {
     choices="$choices $preset"
   done
 
-  ui_section "选择安装集合 / Choose preset"
+  ui_section "选择需要的功能组合 / Choose a bundle"
 
   for preset in $choices; do
-    if [ "$preset" = "project" ]; then
-      printf '  %s) %-12s %s  %b(default)%b\n' \
-        "$index" \
-        "$preset" \
-        "$(catalog_preset_summary "$preset")" \
-        "$DIM" "$RESET"
-    else
-      printf '  %s) %-12s %s\n' \
-        "$index" \
-        "$preset" \
-        "$(catalog_preset_summary "$preset")"
-    fi
+    printf '  %s) %-12s %s\n' \
+      "$index" \
+      "$preset" \
+      "$(catalog_preset_summary "$preset")"
+    printf '      %s\n' "$(catalog_preset_summary "$preset" en)"
     index=$((index + 1))
   done
 
@@ -311,11 +329,11 @@ choose_preset() {
   # CI、后台任务等没有终端时保持旧行为：直接使用默认 project。
   if ! (: </dev/tty) 2>/dev/null; then
     REQUESTED_SET="project"
-    ui_info "非交互环境，使用默认 preset: project"
+    ui_info "无法交互选择，使用默认组合 project / No interactive selection; using project"
     return
   fi
 
-  printf '\n  请选择 [1]: ' > /dev/tty
+  printf '\n  请选择 / Choose [1]: ' > /dev/tty
   IFS= read -r choice < /dev/tty || choice=""
 
   # 什么都不输入直接回车，仍使用当前默认 project。
@@ -331,7 +349,7 @@ choose_preset() {
   done
 
   if [ -z "$selected" ]; then
-    ui_error "无效选择 / Invalid preset: $choice"
+    ui_error "没有找到这个组合 / Bundle not found: $choice"
     exit 1
   fi
 
@@ -351,7 +369,7 @@ fi
 add_selected() {
   local name="$1"
   if ! contains_skill "$name" "$AVAILABLE_SKILLS"; then
-    ui_error "Skill 不存在 / Skill not found: $name"
+    ui_error "没有找到这个 Skill / Skill not found: $name"
     exit 1
   fi
   if ! contains_skill "$name" "$SELECTED_SKILLS"; then
@@ -370,7 +388,7 @@ if [ -n "$REQUESTED_SKILLS" ]; then
   done
 else
   if ! preset_skills="$(catalog_preset_skills "$REQUESTED_SET")"; then
-    ui_error "未知集合 / Unknown preset: $REQUESTED_SET"
+    ui_error "没有找到这个组合 / Bundle not found: $REQUESTED_SET"
     exit 1
   fi
 
@@ -397,7 +415,7 @@ while :; do
 done
 
 [ -n "$SELECTED_SKILLS" ] || {
-  ui_error "最终 Skill 集合为空 / Final Skill set is empty"
+  ui_error "没有选中任何 Skill / No Skills selected"
   exit 1
 }
 
@@ -408,13 +426,13 @@ else
 fi
 
 ui_section "安装计划 / Plan"
-ui_kv "preset" "$preset_label"
-ui_kv "destination" "$(display_path "$DEST_DIR")"
-ui_kv "skills" "$(count_skills "$SELECTED_SKILLS")"
+ui_kv "安装组合 / Bundle" "$preset_label"
+ui_kv "安装位置 / Directory" "$(display_path "$DEST_DIR")"
+ui_kv "功能数量 / Skills" "$(count_skills "$SELECTED_SKILLS")"
 
 if [ "$VERBOSE" = "1" ]; then
-  ui_kv "source" "$REPO_URL@$REF"
-  printf '    %-12s %s\n' "selected" "$SELECTED_SKILLS"
+  ui_kv "下载来源 / Source" "$REPO_URL@$REF"
+  printf '    %-12s %s\n' "所选功能 / Selected" "$SELECTED_SKILLS"
 fi
 
 ensure_gda_repo() {
@@ -422,7 +440,7 @@ ensure_gda_repo() {
     return
   fi
 
-  ui_info "aigengame/godot-agent · fetching"
+  ui_info "下载 Godot 操作工具说明 / Fetching aigengame/godot-agent"
 
   if ! git_clone_repo "$GDA_REF" "$GDA_REPO" "$GDA_ROOT"; then
     ui_error "无法读取 aigengame/godot-agent / Failed to fetch aigengame/godot-agent"
@@ -449,12 +467,12 @@ install_from_dir() {
   local status
 
   if [ ! -d "$src" ] || [ ! -f "$src/SKILL.md" ]; then
-    ui_error "Skill 源无效 / Invalid Skill source: $name"
+    ui_error "安装文件不完整 / Incomplete Skill files: $name"
     exit 1
   fi
 
   if [ -e "$dest" ] && [ ! -f "$marker" ]; then
-    ui_error "拒绝覆盖非本安装器管理的 Skill / Refusing to overwrite unmanaged Skill: $dest"
+    ui_error "此目录不是本安装器创建的，已停止以免覆盖 / Not installed by this installer; stopped to avoid overwriting: $dest"
     exit 1
   fi
 
@@ -540,13 +558,13 @@ install_one() {
       ;;
 
     *)
-      ui_error "未知 Skill provider / Unknown provider for $name: $provider"
+      ui_error "无法确定 $name 的安装来源 / Unknown source for $name: $provider"
       exit 1
       ;;
   esac
 }
 
-ui_section "同步 Skills / Sync"
+ui_section "安装或更新 / Installing or updating"
 
 for name in $SELECTED_SKILLS; do
   install_one "$name"
@@ -566,27 +584,33 @@ for dest in "$DEST_DIR"/*; do
   fi
 done
 
-printf '\n%b✓%b %b完成 / Done%b\n' \
+printf '\n%b✓%b %b安装完成 / Installation complete%b\n' \
   "$GREEN" \
   "$RESET" \
   "$BOLD" \
   "$RESET"
 
-printf '  %s installed  ·  %s updated  ·  %s unchanged  ·  %s removed\n' \
-  "$installed" \
-  "$updated" \
-  "$unchanged" \
-  "$removed"
+printf '  新增 %s · 更新 %s · 无需更新 %s · 移除 %s\n' \
+  "$installed" "$updated" "$unchanged" "$removed"
+printf '  %s installed · %s updated · %s up to date · %s removed\n' \
+  "$installed" "$updated" "$unchanged" "$removed"
 
 printf '  %s\n' "$(display_path "$DEST_DIR")"
 
 if contains_skill "gda" "$SELECTED_SKILLS" && ! command -v gda >/dev/null 2>&1; then
   ui_section "需要处理 / Action required"
-  ui_warn 'gda Skill 已安装，但未检测到 gda CLI：`uv tool install gda`'
+  ui_warn '已安装 gda 的使用说明；要实际操作 Godot，还需安装工具 / To operate Godot, install the tool: `uv tool install gda`'
 fi
 
+ui_section "使用方法 / How to use"
+printf '  在 AI 对话里输入“使用 Skill 名称”，再说明你的需求。\n'
+printf '  In your AI chat, type "Use <skill name>" followed by your request.\n'
+print_skill_descriptions "$SELECTED_SKILLS"
+
 ui_section "下一步 / Next"
-printf '  新会话即可使用这些 Skills；未发现时重启 Agent。\n'
-printf '  %b再次运行同一命令即可更新并收敛受管 Skills。%b\n' \
+printf '  在 AI 开发工具中开启新对话即可使用；没有识别到时重启工具。\n'
+printf '  Start a new chat in your AI coding tool; restart the tool if the Skills are not detected.\n'
+printf '  %b使用相同参数再次运行即可更新；本安装器以前安装、但本次未选择的 Skill 会被移除。%b\n' \
   "$DIM" \
   "$RESET"
+printf '  Rerun with the same arguments to update. Previously managed Skills not selected this time are removed.\n'
