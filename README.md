@@ -1,6 +1,6 @@
 # aki-agent-kit
 
-一套可复用的 AI 开发规则和小工具：帮你准备项目开发说明、保存重要约定、检查项目问题，并在换对话时接着做。
+一套可复用的 AI 开发规则和小工具：帮你准备项目开发说明、拆解目标、保存重要约定、检查项目问题，并在换对话时接着做。
 
 ![aki-agent-kit 仓库封面](assets/aki-agent-kit-social-preview.jpg)
 
@@ -30,7 +30,7 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 | `aki-project-audit` | 检查软件项目的问题，说明影响并提出改进建议 |
 | `aki-open-source-audit` | 检查公开前是否还有密码、私人数据、素材授权等问题 |
 | `aki-game-audit` | 检查游戏体验、运行问题和后续制作成本 |
-| `aki-grill-with-context` | 把想法讨论清楚，在你确认后保存重要结论 |
+| `aki-plan` | 弄清目标，拆成有先后顺序和完成标准的任务；需要时保存计划 |
 | `aki-rednote-cover` | 制作带三颗草和用户名的个人小红书封面 |
 
 `godot` 组合还包含外部工具说明 `gda`，用于操作 Godot、运行游戏并获取截图和日志。实际操作需要安装对应工具，安装器会在缺少工具时提示。
@@ -61,7 +61,9 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 
 ```text
 使用 aki-project-bootstrap 准备当前项目的开发说明。
-使用 aki-grill-with-context 帮我把这个想法讨论清楚。
+使用 aki-plan 帮我把这个想法讨论清楚，先不安排开发任务。
+使用 aki-plan 把这个目标拆成任务，说明先做什么、怎样算完成。
+使用 aki-plan 把刚确认的计划保存到项目已有的任务文档。
 使用 aki-context-sync 把这次讨论的重要约定保存到项目文档。
 使用 aki-handoff 交接当前对话，让新对话继续这件事。
 使用 aki-handoff 根据这份交接说明，核对进度后接着做。
@@ -71,6 +73,8 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 使用 aki-game-audit 检查当前游戏有哪些游玩和实现问题。
 使用 gda 运行当前 Godot 项目并获取截图和日志。
 ```
+
+`aki-plan` 按需要追问；目标已经清楚时直接拆任务，也可只讨论、不生成任务清单。保存计划由它负责；需要把长期项目约定写回正式文档时，再使用 `aki-context-sync`。两者可以分别使用，讨论或保存计划不会自动开始实现。
 
 没有识别到刚安装的 Skill 时，新开对话或重启开发工具。
 

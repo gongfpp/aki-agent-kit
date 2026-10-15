@@ -34,8 +34,8 @@ catalog_skill_summary() {
     aki-open-source-audit:en) echo "Check what needs attention before making a project public" ;;
     aki-game-audit:zh) echo "检查游戏体验、运行问题和后续制作成本" ;;
     aki-game-audit:en) echo "Review gameplay, runtime issues, and content production effort" ;;
-    aki-grill-with-context:zh) echo "把想法讨论清楚，确认后保存重要结论" ;;
-    aki-grill-with-context:en) echo "Clarify an idea together and save confirmed decisions" ;;
+    aki-plan:zh) echo "弄清目标并拆成可执行任务，按需要保存计划" ;;
+    aki-plan:en) echo "Clarify goals, break them into actionable tasks, and save the plan when needed" ;;
     aki-handoff:zh) echo "交接当前对话，让下一个 AI 接着处理同一件事" ;;
     aki-handoff:en) echo "Hand off this conversation so the next AI continues the same task" ;;
     aki-rednote-cover:zh) echo "制作带三颗草和用户名的个人封面" ;;
@@ -55,7 +55,6 @@ catalog_skill_provider() {
 
 catalog_skill_dependencies() {
   case "$1" in
-    aki-grill-with-context) echo "aki-context-sync" ;;
     *) echo "" ;;
   esac
 }
@@ -66,16 +65,16 @@ catalog_preset_skills() {
       echo "aki-project-bootstrap aki-context-sync"
       ;;
     project)
-      echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-project-audit aki-grill-with-context"
+      echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-project-audit aki-plan"
       ;;
     game)
-      echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-game-audit aki-grill-with-context"
+      echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-game-audit aki-plan"
       ;;
     godot)
-      echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-game-audit aki-grill-with-context gda"
+      echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-game-audit aki-plan gda"
       ;;
     opensource)
-      echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-project-audit aki-grill-with-context aki-open-source-audit"
+      echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-project-audit aki-plan aki-open-source-audit"
       ;;
     all)
       echo "__ALL__"
