@@ -223,6 +223,14 @@ fi
 
 mkdir -p "$DEST_DIR"
 tmp_dir="$(mktemp -d "${TMPDIR:-/tmp}/aki-agent-kit.XXXXXX")"
+# MSYS / Git Bash 下 mktemp 即使模板写 /tmp/...，返回的仍是 Windows 形式
+# （如 C:\Users\name\AppData\Local\Temp/aki-agent-kit.XXXXXX）。带盘符的路径会让
+# GNU tar 把 "C:" 当作远程主机（tar host:path 语法）而报
+# "Cannot connect to C: resolve failed"，也会让带路径校验的删除工具拒绝执行。
+# 有 cygpath 时统一转成 POSIX 形式；macOS / Linux 无 cygpath，行为不变。
+if command -v cygpath >/dev/null 2>&1; then
+  tmp_dir="$(cygpath -u "$tmp_dir")"
+fi
 trap 'rm -rf "$tmp_dir"' EXIT
 
 ui_title
