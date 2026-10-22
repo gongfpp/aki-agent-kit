@@ -30,6 +30,7 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 | `aki-project-audit` | 检查软件项目的问题，说明影响并提出改进建议 |
 | `aki-open-source-audit` | 检查公开前是否还有密码、私人数据、素材授权等问题 |
 | `aki-game-audit` | 检查游戏体验、运行问题和后续制作成本 |
+| `aki-align-me` | 用自己的话复述要实现的功能，便于发现理解偏差；不会直接规划或开发 |
 | `aki-plan` | 弄清目标，拆成有先后顺序和完成标准的任务；需要时保存计划 |
 | `aki-rednote-cover` | 制作带三颗草和用户名的个人小红书封面 |
 
@@ -61,6 +62,7 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 
 ```text
 使用 aki-project-bootstrap 准备当前项目的开发说明。
+使用 aki-align-me 先用自己的话说说你理解我要实现什么功能。
 使用 aki-plan 帮我把这个想法讨论清楚，先不安排开发任务。
 使用 aki-plan 把这个目标拆成任务，说明先做什么、怎样算完成。
 使用 aki-plan 把刚确认的计划保存到项目已有的任务文档。
@@ -73,6 +75,8 @@ curl -fsSL https://raw.githubusercontent.com/gongfpp/aki-agent-kit/main/scripts/
 使用 aki-game-audit 检查当前游戏有哪些游玩和实现问题。
 使用 gda 运行当前 Godot 项目并获取截图和日志。
 ```
+
+在支持 Skill 斜杠调用的 DeepSeek Harness（DSH）中，可以直接输入 `/aki-align-me`；它只复述需求并等待纠偏，不会生成开发计划。
 
 `aki-plan` 按需要追问；目标已经清楚时直接拆任务，也可只讨论、不生成任务清单。保存计划由它负责；需要把长期项目约定写回正式文档时，再使用 `aki-context-sync`。两者可以分别使用，讨论或保存计划不会自动开始实现。
 
