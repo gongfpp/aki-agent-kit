@@ -34,6 +34,8 @@ catalog_skill_summary() {
     aki-open-source-audit:en) echo "Check what needs attention before making a project public" ;;
     aki-game-audit:zh) echo "检查游戏体验、运行问题和后续制作成本" ;;
     aki-game-audit:en) echo "Review gameplay, runtime issues, and content production effort" ;;
+    aki-align-me:zh) echo "先用自己的话复述需求，确认功能理解是否准确" ;;
+    aki-align-me:en) echo "Restate the requested feature to check understanding before planning" ;;
     aki-plan:zh) echo "弄清目标并拆成可执行任务，按需要保存计划" ;;
     aki-plan:en) echo "Clarify goals, break them into actionable tasks, and save the plan when needed" ;;
     aki-handoff:zh) echo "交接当前对话，让下一个 AI 接着处理同一件事" ;;
@@ -65,16 +67,16 @@ catalog_preset_skills() {
       echo "aki-project-bootstrap aki-context-sync"
       ;;
     project)
-      echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-project-audit aki-plan"
+      echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-project-audit aki-align-me aki-plan"
       ;;
     game)
-      echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-game-audit aki-plan"
+      echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-game-audit aki-align-me aki-plan"
       ;;
     godot)
-      echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-game-audit aki-plan gda"
+      echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-game-audit aki-align-me aki-plan gda"
       ;;
     opensource)
-      echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-project-audit aki-plan aki-open-source-audit"
+      echo "aki-project-bootstrap aki-context-sync aki-handoff aki-project-readme aki-project-audit aki-align-me aki-plan aki-open-source-audit"
       ;;
     all)
       echo "__ALL__"
